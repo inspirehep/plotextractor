@@ -22,28 +22,37 @@
     as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 
-=======
-plotextractor
-=======
+===============
+ plotextractor
+===============
 
-Small library for extracting plots used in scholarly communication
+Small library for converting and mapping plots in TeX source used in scholarly communication.
 
 * Free software: GPLv2
-* Documentation: https://plotextractor.readthedocs.org. (N/A)
+* Documentation: https://plotextractor.readthedocs.org
 
-Features
-========
-
-- TODO
+*Originally exported from Invenio https://github.com/inveniosoftware/invenio.*
 
 Installation
 ============
 
-The plotextractor package is NOT on PyPI yet.
+.. code-block:: shell
+
+    pip install plotextractor
 
 
-| INSPIRE Development Team
-|   Email: feedback@inspirehep.net
-|   Twitter: http://twitter.com/inspirehep
-|   GitHub: http://github.com/inspirehep
-|   URL: http://inspirehep.net
+
+Usage
+=====
+
+.. code-block:: python
+
+    from plotextractor import process_tarball
+    plots = process_tarball("/path/to/tarball.tar.gz")
+    print(plots[0])
+    {
+        'url': '/path/to/tarball.tar.gz_files/d15-120f3d.png',
+        'captions': ['The $\\rho^0$ meson properties: (a) Mass ...']
+        'name': 'd15-120f3d',
+        'label': 'fig:mass'
+    }

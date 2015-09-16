@@ -35,12 +35,14 @@ history = open('CHANGES.rst').read()
 
 requirements = [
     'six>=1.7.2',
+    'subprocess32>=3.2.6',
+    'Wand>=0.4.1',
 ]
 
 test_requirements = [
-    'coverage>=3.7.1,<4.0a1',
-    'pytest>=2.7.0',
-    'pytest-cov>=1.8.0',
+    'coverage>=4.0.0',
+    'pytest>=2.8.0',
+    'pytest-cov>=2.1.0',
     'pytest-pep8>=1.0.6',
 ]
 
@@ -73,9 +75,6 @@ class PyTest(TestCommand):
         """Run tests."""
         # import here, cause outside the eggs aren't loaded
         import pytest
-        import _pytest.config
-        pm = _pytest.config.get_plugin_manager()
-        pm.consider_setuptools_entrypoints()
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 

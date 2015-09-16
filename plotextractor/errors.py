@@ -22,14 +22,16 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Plotextractor API."""
+"""Custom exceptions."""
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-from .api import process_tarball
-from .version import __version__
 
-__all__ = (
-    "process_tarball",
-    "__version__"
-)
+class InvalidTarball(Exception):
+
+    """Raised when the file to extract is not a valid tarball."""
+
+
+class NoTexFilesFound(Exception):
+
+    """Raised when the extracted has no TeX files."""

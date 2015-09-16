@@ -26,4 +26,5 @@ Changes
 
 Version 0.1.0 (2015-XX-YY)
 
-- First public release.
+- Initial export from Invenio Software <https://github.com/inveniosoftware/invenio>
+- Restructured into stripped down, standalone version

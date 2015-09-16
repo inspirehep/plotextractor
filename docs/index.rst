@@ -23,21 +23,20 @@
 
 .. currentmodule:: plotextractor
 
-Small library for extracting plots used in scholarly communication.
+.. raw:: html
 
-* Free software: GPLv2
-* Documentation: https://plotextractor.readthedocs.org.
+    <p style="height:22px; margin:0 0 0 2em; float:right">
+        <a href="https://travis-ci.org/inspirehep/plotextractor">
+            <img src="https://travis-ci.org/inspirehep/plotextractor.png?branch=master"
+                 alt="travis-ci badge"/>
+        </a>
+        <a href="https://coveralls.io/r/inspirehep/plotextractor">
+            <img src="https://coveralls.io/repos/inspirehep/plotextractor/badge.png?branch=master"
+                 alt="coveralls.io badge"/>
+        </a>
+    </p>
 
-Features
-========
-
-- TODO
-- TODO
-
-Installation
-============
-
-The plotextractor package is on NOT PyPI yet.
+.. include:: ../README.rst
 
 API
 ===
@@ -49,9 +48,11 @@ API
 
 .. include:: ../CONTRIBUTING.rst
 
-License
-=======
-
-.. include:: ../LICENSE
-
 .. include:: ../AUTHORS.rst
+
+
+| INSPIRE Development Team
+|   Email: feedback@inspirehep.net
+|   Twitter: http://twitter.com/inspirehep
+|   GitHub: http://github.com/inspirehep
+|   URL: http://inspirehep.net

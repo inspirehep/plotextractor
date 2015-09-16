@@ -25,7 +25,9 @@
 include LICENSE *.rst
 include .coveragerc run-tests.sh pytest.ini tox.ini
 include docs/*.rst docs/*.py docs/Makefile
+
 recursive-include plotextractor *
 recursive-include *.py *.css *.css_t *.conf *.html
 recursive-include tests *.py
-
+recursive-include docs *.py
+recursive-include tests *.gz

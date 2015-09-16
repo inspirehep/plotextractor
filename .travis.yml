@@ -22,14 +22,28 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Plotextractor API."""
+sudo: false
 
-from __future__ import absolute_import, print_function, unicode_literals
+language: python
 
-from .api import process_tarball
-from .version import __version__
+python:
+  - "2.7"
+#  - "3.3"
+#  - "3.4"
 
-__all__ = (
-    "process_tarball",
-    "__version__"
-)
+install:
+  - pip install --upgrade pip
+  - pip install coveralls check-manifest
+  - pip install pytest pytest-pep8 pytest-cov pytest-cache
+  - pip install -e .[docs,tests]
+
+script:
+  - "sphinx-build -qnNW docs docs/_build/html"
+  - check-manifest
+  - python setup.py test
+
+after_success:
+  - coveralls
+
+notifications:
+  email: false

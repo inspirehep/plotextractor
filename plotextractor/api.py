@@ -24,92 +24,87 @@
 
 """API for plotextractor utility."""
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 
-from invenio.base.globals import cfg
-from invenio.utils.shell import run_shell_command
-
-from .cli import (
+from .extractor import (
     extract_captions,
     extract_context,
-    get_defaults,
 )
-from .converter import convert_images, untar
-from .getter import harvest_single
+from .converter import convert_images, untar, detect_images_and_tex
 from .output_utils import (
-    create_MARC,
-    create_contextfiles,
     prepare_image_data,
-    remove_dups
 )
+from .errors import NoTexFilesFound
 
 
-def get_plots(tarball):
-    """Return a list of found and converted plots given a tarball."""
-    sub_dir, dummy = get_defaults(tarball, cfg['CFG_TMPDIR'], "")
+def process_tarball(tarball, output_directory=None, context=False):
+    """Process one tarball end-to-end.
 
-    tex_files = None
-    image_list = None
+    If output directory is given, the tarball will be extracted there.
+    Otherwise, it will extract it in a folder next to the tarball file.
 
-    dummy, image_list, tex_files = untar(
-        tarball,
-        sub_dir
-    )
+    The function returns a list of dictionaries:
 
-    converted_image_list = convert_images(image_list)
-    extracted_image_data = []
+    .. code-block:: python
+
+        [{
+            'url': '/path/to/tarball_files/d15-120f3d.png',
+            'captions': ['The $\\rho^0$ meson properties: (a) Mass ...'],
+            'name': 'd15-120f3d',
+            'label': 'fig:mass'
+        }, ... ]
+
+    :param: tarball (string): the absolute location of the tarball we wish
+        to process
+    :param: output_directory (string): path of file processing and extraction
+        (optional)
+    :param: context: if True, also try to extract context where images are
+        referenced in the text. (optional)
+    :return: images(list): list of dictionaries for each image with captions.
+    """
+    if not output_directory:
+        # No directory given, so we use the same path as the tarball
+        output_directory = os.path.abspath("{0}_files".format(tarball))
+
+    extracted_files_list = untar(tarball, output_directory)
+    image_list, tex_files = detect_images_and_tex(extracted_files_list)
+
     if tex_files == [] or tex_files is None:
-        # Its not a tarball
-        run_shell_command('rm -r %s', (sub_dir,))
-    else:
-        for tex_file in tex_files:
-            # Extract images, captions and labels
-            partly_extracted_image_data = extract_captions(tex_file,
-                                                           sub_dir,
-                                                           converted_image_list)
-            if partly_extracted_image_data:
-                # Add proper filepaths and do various cleaning
-                cleaned_image_data = prepare_image_data(
-                    partly_extracted_image_data,
-                    tex_file, converted_image_list)
-                # Using prev. extracted info, get contexts for each
-                # image found
-                extracted_image_data.extend(
-                    (extract_context(tex_file, cleaned_image_data)))
+        return NoTexFilesFound("No TeX files found in {0}".format(tarball))
+
+    converted_image_mapping = convert_images(image_list)
+    return map_images_in_tex(
+        tex_files,
+        converted_image_mapping,
+        output_directory,
+        context
+    )
+
+
+def map_images_in_tex(tex_files, image_mapping,
+                      output_directory, context=False):
+    """Return caption and context for image references found in TeX sources."""
+    extracted_image_data = []
+    for tex_file in tex_files:
+        # Extract images, captions and labels based on tex file and images
+        partly_extracted_image_data = extract_captions(
+            tex_file,
+            output_directory,
+            image_mapping.keys()
+        )
+        if partly_extracted_image_data:
+            # Convert to dict, add proper filepaths and do various cleaning
+            cleaned_image_data = prepare_image_data(
+                partly_extracted_image_data,
+                output_directory,
+                image_mapping,
+            )
+            if context:
+                # Using prev. extracted info, get contexts for each image found
+                extract_context(tex_file, cleaned_image_data)
+
+            extracted_image_data.extend(cleaned_image_data)
+
     return extracted_image_data
-
-
-def get_marcxml_plots_from_tarball(tarball):
-    """Given a path to a tar archive, return MARCXML of plots."""
-    extracted_image_data = get_plots(str(tarball))
-    if extracted_image_data:
-        extracted_image_data = remove_dups(extracted_image_data)
-        image_marc_xml = create_MARC(extracted_image_data, tarball, None)
-        if image_marc_xml:
-            create_contextfiles(extracted_image_data)
-            return ('<?xml version="1.0" encoding="UTF-8"?>\n<collection>\n'
-                    '{0}\n</collection>'.format(image_marc_xml))
-
-
-def get_tarball_from_arxiv(arxiv_id, save_to_folder):
-    """Download and return path to arXiv tarball for given article."""
-    if not os.path.exists(save_to_folder):
-        os.makedirs(save_to_folder)
-    tarball, dummy = harvest_single(
-        arxiv_id,
-        save_to_folder,
-        ["tarball"]
-    )
-    return tarball
-
-
-def get_pdf_from_arxiv(arxiv_id, save_to_folder):
-    """Download and return path to arXiv tarball for given article."""
-    if not os.path.exists(save_to_folder):
-        os.makedirs(save_to_folder)
-    dummy, pdf = harvest_single(
-        arxiv_id,
-        save_to_folder,
-        ["pdf"]
-    )
-    return pdf

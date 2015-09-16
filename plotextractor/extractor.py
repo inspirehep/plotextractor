@@ -22,46 +22,26 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Plot extractor cli.
+"""Plot extractor extractor."""
 
-This programme will take a tarball from arXiv, untar it, convert all its
-associated images to PNG, find the captions to the images detailed in the
-included TeX document, and write MARCXML that reflects these associations.
-"""
-
-import getopt
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
-
 import re
 
-import sys
+from .config import (
+    CFG_PLOTEXTRACTOR_CONTEXT_WORD_LIMIT,
+    CFG_PLOTEXTRACTOR_CONTEXT_SENTENCE_LIMIT,
+    CFG_PLOTEXTRACTOR_CONTEXT_EXTRACT_LIMIT,
+    CFG_PLOTEXTRACTOR_DISALLOWED_TEX,
+)
 
-import time
-
-from tempfile import mkstemp
-
-from invenio.config import CFG_PLOTEXTRACTOR_CONTEXT_EXTRACT_LIMIT, \
-    CFG_PLOTEXTRACTOR_CONTEXT_SENTENCE_LIMIT, \
-    CFG_PLOTEXTRACTOR_CONTEXT_WORD_LIMIT, CFG_PLOTEXTRACTOR_DISALLOWED_TEX, \
-    CFG_SITE_URL, CFG_TMPSHAREDDIR
-from invenio.legacy.bibsched.bibtask import task_low_level_submission
-from invenio.utils.shell import Timeout, run_process_with_timeout, \
-    run_shell_command
-from invenio.utils.text import wait_for_user, wrap_text_in_a_box
-
-from invenio_client import InvenioConnector
-
-from .converter import convert_images, extract_text, untar
-from .getter import get_list_of_all_matching_files, make_single_directory, \
-    parse_and_download, tarballs_by_arXiv_id
-from .output_utils import assemble_caption, create_MARC, create_contextfiles, \
-    find_open_and_close_braces, get_image_location, get_tex_location, \
-    prepare_image_data, remove_dups, write_message
-
-assemble_caption, create_contextfiles, create_MARC, \
-    find_open_and_close_braces, get_image_location, get_tex_location, \
-    prepare_image_data, remove_dups, write_message
+from .output_utils import (
+    assemble_caption,
+    find_open_and_close_braces,
+    get_tex_location,
+)
+from .converter import rotate_image
 
 
 ARXIV_HEADER = 'arXiv:'
@@ -69,393 +49,6 @@ PLOTS_DIR = 'plots'
 
 MAIN_CAPTION_OR_IMAGE = 0
 SUB_CAPTION_OR_IMAGE = 1
-
-
-def main():
-    """The main program loop."""
-    help_param = 'help'
-    tarball_param = 'tarball'
-    tardir_param = 'tdir'
-    infile_param = 'input'
-    sdir_param = 'sdir'
-    extract_text_param = 'extract-text'
-    force_param = 'force'
-    upload_param = 'call-bibupload'
-    upload_mode_param = 'upload-mode'
-    yes_i_know_param = 'yes-i-know'
-    recid_param = 'recid'
-    with_docname_param = 'with-docname'
-    with_doctype_param = 'with-doctype'
-    with_docformat_param = 'with-docformat'
-    arXiv_param = 'arXiv'
-    squash_param = 'squash'
-    refno_url_param = 'refno-url'
-    refno_param = 'skip-refno'
-    clean_param = 'clean'
-    param_abbrs = 'h:t:d:s:i:a:l:xfuyr:qck'
-    params = [help_param, tarball_param + '=', tardir_param + '=',
-              sdir_param + '=', infile_param +
-              '=', arXiv_param + '=', refno_url_param + '=',
-              extract_text_param, force_param, upload_param, yes_i_know_param,
-              recid_param + '=',
-              squash_param, clean_param, refno_param, with_docname_param + '=',
-              with_doctype_param + '=', with_docformat_param + '=',
-              upload_mode_param + '=']
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], param_abbrs, params)
-    except getopt.GetoptError as err:
-        write_message(str(err))
-        usage()
-        sys.exit(2)
-
-    tarball = None
-    sdir = None
-    infile = None
-    tdir = None
-    xtract_text = False
-    upload_plots = False
-    force = False
-    squash = False
-    squash_path = ""
-    yes_i_know = False
-    with_docname = None
-    with_doctype = None
-    with_docformat = None
-    arXiv = None
-    clean = False
-    refno_url = CFG_SITE_URL
-    skip_refno = False
-    upload_mode = 'append'
-
-    for opt, arg in opts:
-        if opt in ['-h', '--' + help_param]:
-            usage()
-            sys.exit()
-        elif opt in ['-t', '--' + tarball_param]:
-            tarball = arg
-        elif opt in ['-d', '--' + tardir_param]:
-            tdir = arg
-        elif opt in ['-i', '--' + infile_param]:
-            infile = arg
-        elif opt in ['-a', '--' + arXiv_param]:
-            arXiv = arg
-        elif opt in ['--' + with_docname_param]:
-            with_docname = arg
-        elif opt in ['--' + with_doctype_param]:
-            with_doctype = arg
-        elif opt in ['--' + with_docformat_param]:
-            with_docformat = arg
-        elif opt in ['-s', '--' + sdir_param]:
-            sdir = arg
-        elif opt in ['-x', '--' + extract_text_param]:
-            xtract_text = True
-        elif opt in ['-f', '--' + force_param]:
-            force = True
-        elif opt in ['-u', '--' + upload_param]:
-            upload_plots = True
-        elif opt in ['--' + upload_mode_param]:
-            upload_mode = arg
-        elif opt in ['-q', '--' + squash_param]:
-            squash = True
-        elif opt in ['-y', '--' + yes_i_know_param]:
-            yes_i_know = True
-        elif opt in ['-c', '--' + clean_param]:
-            clean = True
-        elif opt in ['-l', '--' + refno_url_param]:
-            refno_url = arg
-        elif opt in ['-k', '--' + refno_param]:
-            skip_refno = True
-        else:
-            usage()
-            sys.exit()
-
-    allowed_upload_modes = ('insert', 'append', 'correct', 'replace')
-    if upload_mode not in allowed_upload_modes:
-        write_message('Specified upload mode %s is not valid. Must be in %s' %
-                      (upload_mode, ', '.join(allowed_upload_modes)))
-        usage()
-        sys.exit()
-
-    if sdir is None:
-        sdir = CFG_TMPSHAREDDIR
-    elif not os.path.isdir(sdir):
-        try:
-            os.makedirs(sdir)
-        except Exception:
-            write_message('Error: We can\'t use this sdir.  using ' +
-                          'CFG_TMPSHAREDDIR')
-            sdir = CFG_TMPSHAREDDIR
-
-    if skip_refno:
-        refno_url = ""
-
-    tars_and_gzips = []
-
-    if tarball:
-        tars_and_gzips.append(tarball)
-    if tdir:
-        filetypes = ['gzip compressed', 'tar archive', 'Tar archive']  # FIXME
-        write_message('Currently processing any tarballs in ' + tdir)
-        tars_and_gzips.extend(get_list_of_all_matching_files(tdir, filetypes))
-    if infile:
-        tars_and_gzips.extend(parse_and_download(infile, sdir))
-    if arXiv:
-        tars_and_gzips.extend(tarballs_by_arXiv_id([arXiv], sdir))
-    if not tars_and_gzips:
-        write_message('Error: no tarballs to process!')
-        sys.exit(1)
-
-    if squash:
-        squash_fd, squash_path = mkstemp(
-            suffix="_" + time.strftime("%Y%m%d%H%M%S") + ".xml",
-            prefix="plotextractor_", dir=sdir)
-        os.write(
-            squash_fd,
-            '<?xml version="1.0" encoding="UTF-8"?>\n<collection>\n')
-        os.close(squash_fd)
-
-    for tarball in tars_and_gzips:
-        recid = None
-        if isinstance(tarball, tuple):
-            tarball, recid = tarball
-        process_single(tarball, sdir=sdir, xtract_text=xtract_text,
-                       upload_plots=upload_plots, force=force,
-                       squash=squash_path,
-                       yes_i_know=yes_i_know, refno_url=refno_url,
-                       clean=clean, recid=recid, upload_mode=upload_mode)
-    if squash:
-        squash_fd = open(squash_path, "a")
-        squash_fd.write("</collection>\n")
-        squash_fd.close()
-        write_message("generated %s" % (squash_path,))
-        if upload_plots:
-            upload_to_site(squash_path, yes_i_know, upload_mode)
-
-
-def process_single(tarball, sdir=CFG_TMPSHAREDDIR, xtract_text=False,
-                   upload_plots=False, force=False, squash="",
-                   yes_i_know=False, refno_url="",
-                   clean=False, recid=None, upload_mode='append',
-                   direct_xml_output=False):
-    """Processe one tarball end-to-end.
-
-    :param: tarball (string): the absolute location of the tarball we wish
-        to process
-    :param: sdir (string): where we should put all the intermediate files for
-        the processing.  if you're uploading, this directory should be one
-        of the ones specified in CFG_BIBUPLOAD_FFT_ALLOWED_LOCAL_PATHS, else
-        the upload won't work
-    :param: xtract_text (boolean): true iff you want to run pdftotext on the
-        pdf versions of the tarfiles.  this programme assumes that the pdfs
-        are named the same as the tarballs but with a .pdf extension.
-    :param: upload_plots (boolean): true iff you want to bibupload the plots
-        extracted by this process
-    :param: force (boolean): force creation of new xml file
-    :param: squash: write MARCXML output into a specified 'squash' file
-        instead of single files.
-    :param: yes_i_know: if True, no user interaction if upload_plots is True
-    :param: refno_url: URL to the invenio-instance to query for refno.
-    :param: clean: if True, everything except the original tarball, plots and
-            context- files will be removed
-    :param recid: the record ID linked to this tarball. Overrides C{refno_url}
-    :param upload_mode: the mode in which to call bibupload
-           (when C{upload_plots} is set to True.
-    :return: marc_name(string): path to generated marcxml file
-    """
-    sub_dir, refno = get_defaults(tarball, sdir, refno_url, recid)
-    if not squash:
-        marc_name = os.path.join(sub_dir, '%s.xml' % (refno,))
-        if force or not os.path.exists(marc_name):
-            marc_fd = open(marc_name, 'w')
-            marc_fd.write(
-                '<?xml version="1.0" encoding="UTF-8"?>\n<collection>\n')
-            marc_fd.close()
-    else:
-        marc_name = squash
-    if xtract_text:
-        extract_text(tarball)
-    try:
-        extracted_files_list, image_list, tex_files = untar(tarball, sub_dir)
-    except Timeout:
-        write_message('Timeout during tarball extraction on %s' % (tarball,))
-        return None
-
-    if tex_files == [] or tex_files is None:
-        write_message('%s is not a tarball' % (os.path.split(tarball)[-1],))
-        run_shell_command('rm -r %s', (sub_dir,))
-        return
-
-    converted_image_list = convert_images(image_list)
-    write_message(
-        'converted %d of %d images found for %s' % (len(converted_image_list),
-                                                    len(image_list),
-                                                    os.path.basename(tarball)))
-    extracted_image_data = []
-
-    for tex_file in tex_files:
-        # Extract images, captions and labels
-        partly_extracted_image_data = extract_captions(tex_file, sub_dir,
-                                                       converted_image_list)
-        if not partly_extracted_image_data == []:
-            # Add proper filepaths and do various cleaning
-            cleaned_image_data = prepare_image_data(
-                partly_extracted_image_data,
-                tex_file, converted_image_list)
-            # Using prev. extracted info, get contexts for each image found
-            extracted_image_data.extend(
-                (extract_context(tex_file, cleaned_image_data)))
-    extracted_image_data = remove_dups(extracted_image_data)
-
-    marc_xml = None
-    if not extracted_image_data == []:
-        if refno_url == "":
-            refno = None
-        create_contextfiles(extracted_image_data)
-        marc_xml = create_MARC(extracted_image_data, tarball, refno)
-        if not squash:
-            marc_xml += "\n</collection>"
-        if marc_name:
-            marc_fd = open(marc_name, 'a')
-            marc_fd.write('%s\n' % (marc_xml,))
-            marc_fd.close()
-            if not squash:
-                write_message('generated %s' % (marc_name,))
-                if upload_plots:
-                    upload_to_site(marc_name, yes_i_know, upload_mode)
-    if clean:
-        clean_up(extracted_files_list, image_list)
-
-    if direct_xml_output is True:
-        return marc_xml
-    else:
-        return marc_name
-
-
-def clean_up(extracted_files_list, image_list):
-    """Remove all the intermediate stuff.
-
-    :param: extracted_files_list ([string, string, ...]): list of all
-        extracted files
-    :param: image_list ([string, string, ...]): list of the images to keep
-
-    """
-    for extracted_file in extracted_files_list:
-        # Remove everything that is not in the image_list or is not a directory
-        if extracted_file not in image_list and extracted_file[-1] != os.sep:
-            run_shell_command('rm %s', (extracted_file,))
-
-
-def get_defaults(tarball, sdir, refno_url, recid=None):
-    """A function for parameter-checking.
-
-    :param: tarball (string): the location of the tarball to be extracted
-    :param: sdir (string): the location of the scratch directory for untarring,
-        conversions, and the ultimate destination of the MARCXML
-    :param: refno_url (string): server location on where to look for refno
-
-    :param recid: (int) if set, overrides C{refno_url} and consider this record
-    :return sdir, refno (string, string): the same
-        arguments it was sent as is appropriate.
-    """
-    if not sdir or recid:
-        # Missing sdir: using default directory: CFG_TMPDIR
-        sdir = CFG_TMPSHAREDDIR
-    else:
-        sdir = os.path.split(tarball)[0]
-
-    # make a subdir in the scratch directory for each tarball
-    sdir = make_single_directory(sdir,
-                                 os.path.split(tarball)[-1] + '_' + PLOTS_DIR)
-    if recid:
-        refno = str(recid)
-    elif refno_url != "":
-        refno = get_reference_number(tarball, refno_url)
-        if refno is None:
-            refno = os.path.basename(tarball)
-            write_message('Error: can\'t find record id for %s' % (refno,))
-    else:
-        refno = os.path.basename(tarball)
-        write_message("Skipping ref-no check")
-    return sdir, refno
-
-
-def get_reference_number(tarball, refno_url):
-    """Attempt to determine the reference number of the file by searching.
-
-    :param: tarball (string): the name of the tarball as downloaded from
-        arXiv
-    :param: refno_url (string): url of repository to check for a
-        reference number for this record. If not set; returns None
-
-    :return: refno (string): the reference number of the paper
-    """
-    if refno_url:
-        server = InvenioConnector(refno_url)
-        # we just need the name of the file
-        tarball = os.path.split(tarball)[1]
-        prefix = '037__a:'
-        # the name right now looks like arXiv:hep-ph_9703009
-        # or arXiv:0910.0476
-        if tarball.startswith(ARXIV_HEADER):
-            if len(tarball.split('_')) > 1:
-                tarball = tarball.split(':')[1]
-                arXiv_record = tarball.replace('_', '/')
-            else:
-                arXiv_record = tarball
-            result = server.search(p=prefix + arXiv_record, of='id')
-            if len(result) == 0:
-                return None
-            return str(result[0])
-        arXiv_record = re.findall(
-            '(([a-zA-Z\\-]+/\\d+)|(\\d+\\.\\d+))', tarball)
-        if len(arXiv_record) > 1:
-            arXiv_record = arXiv_record[0]
-            result = server.search(p=prefix + arXiv_record, of='id')
-            if len(result) > 0:
-                return str(result[0])
-        tarball_mod = tarball.replace('_', '/')
-        arXiv_record = re.findall('(([a-zA-Z\\-]+/\\d+)|(\\d+\\.\\d+))',
-                                  tarball_mod)
-        if len(arXiv_record) > 1:
-            arXiv_record = arXiv_record[0]
-            result = server.search(p=prefix + arXiv_record, of='id')
-            if len(result) > 0:
-                return str(result[0])
-    return None
-
-
-def rotate_image(filename, line, sdir, image_list):
-    """Rotate a image.
-
-    Given a filename and a line, figure out what it is that the author
-    wanted to do wrt changing the rotation of the image and convert the
-    file so that this rotation is reflected in its presentation.
-
-    :param: filename (string): the name of the file as specified in the TeX
-    :param: line (string): the line where the rotate command was found
-
-    :output: the image file rotated in accordance with the rotate command
-    :return: True if something was rotated
-    """
-    file_loc = get_image_location(filename, sdir, image_list)
-    degrees = re.findall('(angle=[-\\d]+|rotate=[-\\d]+)', line)
-
-    if len(degrees) < 1:
-        return False
-
-    degrees = degrees[0].split('=')[-1].strip()
-
-    if file_loc is None or file_loc == 'ERROR' or\
-            not re.match('-*\\d+', degrees):
-        return False
-
-    degrees = str(0 - int(degrees))
-    cmd_list = ['mogrify', '-rotate', degrees, file_loc]
-    dummy, dummy, cmd_err = run_process_with_timeout(cmd_list)
-    if cmd_err != '':
-        return True
-    else:
-        return True
 
 
 def get_context(lines, backwards=False):
@@ -544,14 +137,13 @@ def extract_context(tex_file, extracted_image_data):
     fd.close()
 
     # Generate context for each image and its assoc. labels
-    new_image_data = []
-    for image, caption, label in extracted_image_data:
+    for data in extracted_image_data:
         context_list = []
 
         # Generate a list of index tuples for all matches
         indicies = [match.span()
                     for match in re.finditer(r"(\\(?:fig|ref)\{%s\})" %
-                                             (re.escape(label),),
+                                             (re.escape(data['label']),),
                                              lines)]
         for startindex, endindex in indicies:
             # Retrive all lines before label until beginning of file
@@ -567,9 +159,10 @@ def extract_context(tex_file, extracted_image_data):
             text_after = lines[endindex:i]
             context_after = get_context(text_after)
             context_list.append(
-                context_before + ' \\ref{' + label + '} ' + context_after)
-        new_image_data.append((image, caption, label, context_list))
-    return new_image_data
+                context_before + ' \\ref{' + data['label'] + '} ' +
+                context_after
+            )
+        data['contexts'] = context_list
 
 
 def extract_captions(tex_file, sdir, image_list, primary=True):
@@ -635,6 +228,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
 
     # are we using commas in filenames here?
     commas_okay = False
+
     for dummy1, dummy2, filenames in \
             os.walk(os.path.split(os.path.split(tex_file)[0])[0]):
         for filename in filenames:
@@ -660,7 +254,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         if line == '':
             continue
         if line.find(doc_tail) > -1:
-            return extracted_image_data
+            break
 
         """
         FIGURE -
@@ -779,9 +373,10 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                     new_tex_file = get_tex_location(new_tex_name, tex_file)
                     if new_tex_file and primary:  # to kill recursion
                         extracted_image_data.extend(extract_captions(
-                                                    new_tex_file, sdir,
-                                                    image_list,
-                                                    primary=False))
+                            new_tex_file, sdir,
+                            image_list,
+                            primary=False
+                        ))
 
         """PICTURE"""
 
@@ -790,7 +385,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             # structure of a picture:
             # \begin{picture}
             # ....not worrying about this now
-            # write_message('found picture tag')
+            # print('found picture tag')
             # FIXME
             pass
 
@@ -801,7 +396,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             # structure of a displaymath:
             # \begin{displaymath}
             # ....not worrying about this now
-            # write_message('found displaymath tag')
+            # print('found displaymath tag')
             # FIXME
             pass
 
@@ -848,9 +443,9 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         if index > -1:
             # if we are dealing with subfloats, we need a different
             # sort of structure to keep track of captions and subcaptions
-            if type(cur_image) != list:
+            if not isinstance(cur_image, list):
                 cur_image = [cur_image, []]
-            if type(caption) != list:
+            if not isinstance(caption, list):
                 caption = [caption, []]
 
             open_square, open_square_line, close_square, close_square_line = \
@@ -1267,122 +862,3 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
                     files_included.append(subfile)
 
     return files_included
-
-
-def upload_to_site(marcxml, yes_i_know, upload_mode="append"):
-    """Upload to site.
-
-    makes the appropriate calls to bibupload to get the MARCXML record onto
-    the site. Uploads in "correct" mode.
-
-    :param: marcxml (string): the absolute location of the MARCXML that was
-        generated by this programme
-    :param: yes_i_know (boolean): if true, no confirmation.  if false, prompt.
-
-    :output: a new record on the invenio site
-
-    :return: None
-    """
-    if not yes_i_know:
-        wait_for_user(wrap_text_in_a_box('You are going to upload new ' +
-                                         'plots to the server.'))
-    task_low_level_submission(
-        'bibupload', 'admin',
-        upload_mode and '--' + upload_mode or '', marcxml)
-
-help_string = """
-    name: plotextractor
-    usage:
-            plotextractor -d tar/dir -s scratch/dir
-            plotextractor -i inputfile -u
-            plotextractor --arXiv=arXiv_id
-
-    example:
-            plotextractor -d /some/path/with/tarballs
-            plotextractor -i input.txt --no-sdir --extract-text
-            plotextractor --arXiv=hep-ex/0101001
-
-    options:
-        -d, --tardir=
-            if you wish to do a batch of tarballs, search the tree
-            rooted at this directory for them
-
-        -s, --scratchdir=
-            the directory for scratchwork (untarring, conversion, etc.).
-            make sure that this directory is one of the allowed dirs in
-            CFG_BIBUPLOAD_FFT_ALLOWED_LOCAL_PATHS to avoid errors.  with an
-            sdir selected, one xml file will be generated for the whole
-            batch of files processed, and it will live in this sdir.
-
-        -i, --input=
-            if you wish to give an input file for downloading files from
-            arXiv (or wherever), this is the pointer to that file, which
-            should contain urls to download, no more than 1 per line.  each
-            line should be the url of a tarball or gzipped tarball, and
-            each downloaded item will then be processed.
-
-        -x, --extract-text
-            if there is a pdf with the same base name as the tarball for each
-            tarball this is being run on, running with the -x parameter will
-            run pdftotext on each of these pdfs and store the result in the
-            folder
-
-        -f, --force
-            if you want to overwrite everything that was done before, just
-            force the script to overwrite it.  otherwise it will only run on
-            things that haven't been run on yet (for use with tardir).
-
-        -c, --clean
-            if you wish to do delete all non-essential files that were
-            extracted.
-
-        -u, --call-bibupload, --yes-i-know
-            if you want to upload the plots, ask to call bibupload.  appending
-            the --yes-i-know flag bypasses bibupload's prompt to upload
-
-        --upload-mode=
-            if you use --call-bibupload option, allows to specify in which
-            mode BibUpload should process the input. Can take values:
-            'insert', 'append', 'correct' or 'replace'
-
-        -l, --refno-url
-            Specify an URL to the invenio-instance to query for refno.
-            Defaults to CFG_SITE_URL.
-
-        -k, --skip-refno
-            allows you to skip any refno check
-
-        --with-docname=
-            allow to choose files to process on the basis of their docname,
-            when used with --recid option
-
-        --with-doctype=
-            allow to choose files to process on the basis of their doctype,
-            when used with --recid option
-
-        --with-docformat=
-            allow to choose files to process on the basis of their format,
-            when used with --recid option
-
-        -a, --arXiv=
-            if you want to process the tarball of one arXiv id, use this tag.
-
-        -t, --tarball=
-            for processing one tarball.
-
-        -q, --squash
-            if you want to squash all MARC into a single MARC file (for easier
-            and faster bibuploading)
-
-        -h, --help
-            Print this help and exit.
-
-    description: extracts plots from a tarfile from arXiv and generates
-        MARCXML that links figures and their captions.  converts all
-        images to PNG format.
-"""
-
-
-def usage():
-    """Print usage."""
-    write_message(help_string)

@@ -12,7 +12,7 @@ Small library for extracting plots used in scholarly communication.
 What's new
 ----------
 
-- Initial import from Invenio Software <https://github.com/inveniosoftware/invenio>
+- Initial export from Invenio Software <https://github.com/inveniosoftware/invenio>
 - Restructured into stripped down, standalone version
 
 Installation
