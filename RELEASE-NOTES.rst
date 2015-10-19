@@ -2,7 +2,7 @@
  plotextractor v0.1.0 is released
 ===================================
 
-plotextractor v0.1.0 was released on 2015-07-22
+plotextractor v0.1.0 was released on 2015-10-19
 
 About
 -----
