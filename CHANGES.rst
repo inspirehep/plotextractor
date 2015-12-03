@@ -24,6 +24,10 @@
 Changes
 =======
 
+Version 0.1.1 (2015-12-04)
+
+- Improves extraction from TeX file by reading files with encoding.
+
 Version 0.1.0 (2015-10-19)
 
 - Initial export from Invenio Software <https://github.com/inveniosoftware/invenio>

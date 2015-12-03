@@ -29,7 +29,7 @@
 Small library for converting and mapping plots in TeX source used in scholarly communication.
 
 * Free software: GPLv2
-* Documentation: https://plotextractor.readthedocs.org
+* Documentation: http://pythonhosted.org/plotextractor/
 
 *Originally exported from Invenio https://github.com/inveniosoftware/invenio.*
 

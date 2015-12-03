@@ -1,8 +1,8 @@
 ===================================
- plotextractor v0.1.0 is released
+ plotextractor v0.1.1 is released
 ===================================
 
-plotextractor v0.1.0 was released on 2015-10-19
+plotextractor v0.1.1 was released on 2015-12-04
 
 About
 -----
@@ -12,18 +12,17 @@ Small library for extracting plots used in scholarly communication.
 What's new
 ----------
 
-- Initial export from Invenio Software <https://github.com/inveniosoftware/invenio>
-- Restructured into stripped down, standalone version
+- Improves extraction from TeX file by reading files with encoding.
 
 Installation
 ------------
 
-   $ pip install plotextractor
+   $ pip install plotextractor==0.1.1
 
 Documentation
 -------------
 
-   http://plotextractor.readthedocs.org/en/v0.1.0
+   http://pythonhosted.org/plotextractor/
 
 Homepage
 --------
