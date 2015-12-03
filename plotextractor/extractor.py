@@ -26,6 +26,7 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+import codecs
 import os
 import re
 
@@ -132,9 +133,8 @@ def extract_context(tex_file, extracted_image_data):
     """
     if os.path.isdir(tex_file) or not os.path.exists(tex_file):
         return []
-    fd = open(tex_file)
-    lines = fd.read()
-    fd.close()
+
+    lines = "".join(get_lines_from_file(tex_file))
 
     # Generate context for each image and its assoc. labels
     for data in extracted_image_data:
@@ -186,9 +186,8 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
     """
     if os.path.isdir(tex_file) or not os.path.exists(tex_file):
         return []
-    fd = open(tex_file)
-    lines = fd.readlines()
-    fd.close()
+
+    lines = get_lines_from_file(tex_file)
 
     # possible figure lead-ins
     figure_head = '\\begin{figure'  # also matches figure*
@@ -862,3 +861,17 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
                     files_included.append(subfile)
 
     return files_included
+
+
+def get_lines_from_file(filepath, encoding="UTF-8"):
+    """Return an iterator over lines."""
+    try:
+        fd = codecs.open(filepath, 'r', encoding)
+        lines = fd.readlines()
+    except UnicodeDecodeError:
+        # Fall back to 'ISO-8859-1'
+        fd = codecs.open(filepath, 'r', 'ISO-8859-1')
+        lines = fd.readlines()
+    finally:
+        fd.close()
+    return lines
