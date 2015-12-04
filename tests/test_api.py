@@ -64,3 +64,16 @@ def test_process_api_invalid_text():
     with tempfile.NamedTemporaryFile() as f:
         with pytest.raises(plotextractor.errors.InvalidTarball):
             plotextractor.process_tarball(f.name)
+
+
+def test_process_api_with_image_rotation():
+    """Test simple API for extracting and linking files to TeX context."""
+    path_to_tarball = os.path.join(os.path.dirname(__file__),
+                                   'data',
+                                   '1410.1214v3.tar.gz')
+    plots = plotextractor.process_tarball(path_to_tarball)
+    assert len(plots) == 7
+    assert "label" in plots[0]
+    assert "original_url" in plots[0]
+    assert "captions" in plots[0]
+    assert "name" in plots[0]

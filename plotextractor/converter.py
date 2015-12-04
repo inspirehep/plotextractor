@@ -194,7 +194,15 @@ def rotate_image(filename, line, sdir, image_list):
             not re.match('-*\\d+', degrees):
         return False
 
-    with Image(filename=file_loc) as image:
-        with image.clone() as rotated:
-            rotated.rotate(degrees)
-            rotated.save(filename=file_loc)
+    if degrees:
+        try:
+            degrees = int(degrees)
+        except (ValueError, TypeError):
+            return False
+
+        with Image(filename=file_loc) as image:
+            with image.clone() as rotated:
+                rotated.rotate(degrees)
+                rotated.save(filename=file_loc)
+        return True
+    return False
