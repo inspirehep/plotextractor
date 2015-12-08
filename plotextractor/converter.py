@@ -31,6 +31,8 @@ import tarfile
 import re
 
 from subprocess32 import check_output, TimeoutExpired
+
+from wand.exceptions import MissingDelegateError
 from wand.image import Image
 
 from .errors import InvalidTarball
@@ -154,7 +156,11 @@ def convert_images(image_list, image_format="png", timeout=20):
             # for sure it can do EPS->PNG and JPG->PNG and PS->PNG
             # and PSTEX->PNG
             converted_image_file = get_converted_image_name(image_file)
-            convert_image(image_file, converted_image_file, image_format)
+            try:
+                convert_image(image_file, converted_image_file, image_format)
+            except MissingDelegateError:
+                # Too bad, cannot convert image format.
+                continue
             if os.path.exists(converted_image_file):
                 image_mapping[converted_image_file] = image_file
 
