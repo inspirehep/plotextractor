@@ -24,6 +24,13 @@
 Changes
 =======
 
+Version 0.1.2 (2015-12-08)
+
+- Adds wrapfigure support.
+- Catches problems with image conversions.
+- More robust handling of image rotations in TeX sources.
+- Removes unicode_literals usage.
+
 Version 0.1.1 (2015-12-04)
 
 - Improves extraction from TeX file by reading files with encoding.
