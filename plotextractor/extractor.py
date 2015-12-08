@@ -191,7 +191,9 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
 
     # possible figure lead-ins
     figure_head = u'\\begin{figure'  # also matches figure*
+    figure_wrap_head = u'\\begin{wrapfigure'
     figure_tail = u'\\end{figure'  # also matches figure*
+    figure_wrap_tail = u'\\end{wrapfigure'
     picture_head = u'\\begin{picture}'
     displaymath_head = u'\\begin{displaymath}'
     subfloat_head = u'\\subfloat'
@@ -265,7 +267,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         \end{figure}
         """
 
-        index = line.find(figure_head)
+        index = max([line.find(figure_head), line.find(figure_wrap_head)])
         if index > -1:
             in_figure_tag = 1
             # some punks don't like to put things in the figure tag.  so we
@@ -541,7 +543,11 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         of the loop in case some pathological person puts everything in one
         line
         """
-        index = max([line.find(figure_tail), line.find(doc_tail)])
+        index = max([
+            line.find(figure_tail),
+            line.find(figure_wrap_tail),
+            line.find(doc_tail)
+        ])
         if index > -1:
             in_figure_tag = 0
             cur_image, caption, extracted_image_data = \

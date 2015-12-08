@@ -39,10 +39,13 @@ def test_process_api():
     plots = plotextractor.process_tarball(path_to_tarball)
     assert len(plots) == 22
     assert "label" in plots[0]
+    assert plots[0]["label"]
     assert "url" in plots[0]
     assert "original_url" in plots[0]
     assert "captions" in plots[0]
+    assert plots[0]["captions"]
     assert "name" in plots[0]
+    assert plots[0]["name"]
 
 
 def test_process_api_with_context():
@@ -72,7 +75,7 @@ def test_process_api_with_image_rotation():
                                    'data',
                                    '1410.1214v3.tar.gz')
     plots = plotextractor.process_tarball(path_to_tarball)
-    assert len(plots) == 7
+    assert len(plots) == 9
     assert "label" in plots[0]
     assert "original_url" in plots[0]
     assert "captions" in plots[0]
