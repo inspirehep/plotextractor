@@ -26,7 +26,7 @@
 
 """Plotextractor configuration."""
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import, print_function
 
 
 # CFG_PLOTEXTRACTOR_DESY_BASE --

@@ -24,7 +24,7 @@
 
 """Plotextractor API."""
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import, print_function
 
 from .api import process_tarball
 from .version import __version__

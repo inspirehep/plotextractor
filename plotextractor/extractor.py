@@ -24,7 +24,7 @@
 
 """Plot extractor extractor."""
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import, print_function
 
 import codecs
 import os
@@ -190,26 +190,26 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
     lines = get_lines_from_file(tex_file)
 
     # possible figure lead-ins
-    figure_head = '\\begin{figure'  # also matches figure*
-    figure_tail = '\\end{figure'  # also matches figure*
-    picture_head = '\\begin{picture}'
-    displaymath_head = '\\begin{displaymath}'
-    subfloat_head = '\\subfloat'
-    subfig_head = '\\subfigure'
-    includegraphics_head = '\\includegraphics'
-    epsfig_head = '\\epsfig'
-    input_head = '\\input'
+    figure_head = u'\\begin{figure'  # also matches figure*
+    figure_tail = u'\\end{figure'  # also matches figure*
+    picture_head = u'\\begin{picture}'
+    displaymath_head = u'\\begin{displaymath}'
+    subfloat_head = u'\\subfloat'
+    subfig_head = u'\\subfigure'
+    includegraphics_head = u'\\includegraphics'
+    epsfig_head = u'\\epsfig'
+    input_head = u'\\input'
     # possible caption lead-ins
-    caption_head = '\\caption'
-    figcaption_head = '\\figcaption'
-    label_head = '\\label'
-    rotate = 'rotate='
-    angle = 'angle='
-    eps_tail = '.eps'
-    ps_tail = '.ps'
+    caption_head = u'\\caption'
+    figcaption_head = u'\\figcaption'
+    label_head = u'\\label'
+    rotate = u'rotate='
+    angle = u'angle='
+    eps_tail = u'.eps'
+    ps_tail = u'.ps'
 
-    doc_head = '\\begin{document}'
-    doc_tail = '\\end{document}'
+    doc_head = u'\\begin{document}'
+    doc_tail = u'\\end{document}'
 
     extracted_image_data = []
     cur_image = ''
