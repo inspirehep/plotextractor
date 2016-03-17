@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -31,12 +31,33 @@ import pytest
 import plotextractor
 
 
-def test_process_api():
+@pytest.fixture
+def tarball_flat():
+    """Return path to testdata with a flat file hierarchy."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '1508.03176v1.tar.gz')
+
+
+@pytest.fixture
+def tarball_rotation():
+    """Return path to testdata with an image file with rotation."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '1508.03176v1.tar.gz')
+
+
+@pytest.fixture
+def tarball_nested_folder():
+    """Return path to testdata with images in a nested folder."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '1603.04438v1.tar.gz')
+
+
+def test_process_api(tarball_flat):
     """Test simple API for extracting and linking files to TeX."""
-    path_to_tarball = os.path.join(os.path.dirname(__file__),
-                                   'data',
-                                   '1508.03176v1.tar.gz')
-    plots = plotextractor.process_tarball(path_to_tarball)
+    plots = plotextractor.process_tarball(tarball_flat)
     assert len(plots) == 22
     assert "label" in plots[0]
     assert plots[0]["label"]
@@ -48,14 +69,32 @@ def test_process_api():
     assert plots[0]["name"]
 
 
-def test_process_api_with_context():
+def test_process_api_with_context(tarball_flat):
     """Test simple API for extracting and linking files to TeX context."""
-    path_to_tarball = os.path.join(os.path.dirname(__file__),
-                                   'data',
-                                   '1508.03176v1.tar.gz')
-    plots = plotextractor.process_tarball(path_to_tarball, context=True)
+    plots = plotextractor.process_tarball(tarball_flat, context=True)
     assert len(plots) == 22
     assert "contexts" in plots[0]
+    assert "label" in plots[0]
+    assert "original_url" in plots[0]
+    assert "captions" in plots[0]
+    assert "name" in plots[0]
+
+
+def test_process_api_with_nested(tarball_nested_folder):
+    """Test simple API for extracting and linking files to TeX context."""
+    plots = plotextractor.process_tarball(tarball_nested_folder, context=True)
+    assert len(plots) == 9
+    assert "contexts" in plots[0]
+    assert "label" in plots[0]
+    assert "original_url" in plots[0]
+    assert "captions" in plots[0]
+    assert "name" in plots[0]
+
+
+def test_process_api_with_image_rotation(tarball_rotation):
+    """Test simple API for extracting and linking files to TeX context."""
+    plots = plotextractor.process_tarball(tarball_rotation)
+    assert len(plots) == 22
     assert "label" in plots[0]
     assert "original_url" in plots[0]
     assert "captions" in plots[0]
@@ -67,16 +106,3 @@ def test_process_api_invalid_text():
     with tempfile.NamedTemporaryFile() as f:
         with pytest.raises(plotextractor.errors.InvalidTarball):
             plotextractor.process_tarball(f.name)
-
-
-def test_process_api_with_image_rotation():
-    """Test simple API for extracting and linking files to TeX context."""
-    path_to_tarball = os.path.join(os.path.dirname(__file__),
-                                   'data',
-                                   '1410.1214v3.tar.gz')
-    plots = plotextractor.process_tarball(path_to_tarball)
-    assert len(plots) == 9
-    assert "label" in plots[0]
-    assert "original_url" in plots[0]
-    assert "captions" in plots[0]
-    assert "name" in plots[0]

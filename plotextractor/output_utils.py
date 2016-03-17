@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2010, 2011, 2014, 2015 CERN.
+# Copyright (C) 2010, 2011, 2014, 2015, 2016 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -220,7 +220,6 @@ def get_image_location(image, sdir, image_list, recurred=False):
     :return: converted_image (string): the full path to the (possibly
         converted) image file
     """
-
     if isinstance(image, list):
         # image is a list, not good
         return None
@@ -231,11 +230,12 @@ def get_image_location(image, sdir, image_list, recurred=False):
     figure_or_file = '(figure=|file=)'
     figure_or_file_in_image = re.findall(figure_or_file, image)
     if len(figure_or_file_in_image) > 0:
-        image.replace(figure_or_file_in_image[0], '')
-    includegraphics = '\\includegraphics{'
+        image = image.replace(figure_or_file_in_image[0], '')
+
+    includegraphics = r'\\includegraphics{(.+)}'
     includegraphics_in_image = re.findall(includegraphics, image)
     if len(includegraphics_in_image) > 0:
-        image.replace(includegraphics_in_image[0], '')
+        image = includegraphics_in_image[0]
 
     image = image.strip()
 
@@ -252,16 +252,15 @@ def get_image_location(image, sdir, image_list, recurred=False):
         return None
 
     image = image.strip()
-
-    image_path = os.path.join(sdir, image)
-    converted_image_should_be = get_converted_image_name(image_path)
+    converted_image_should_be = get_converted_image_name(image)
 
     if image_list is None:
         image_list = os.listdir(sdir)
 
     for png_image in image_list:
-        if converted_image_should_be == png_image:
-            return png_image
+        img_dir, img_name = os.path.split(png_image)
+        if converted_image_should_be == img_name:
+            return os.path.join(img_dir, converted_image_should_be)
 
     # maybe it's in a subfolder called eps (TeX just understands that)
     if os.path.isdir(os.path.join(sdir, 'eps')):
