@@ -60,5 +60,5 @@ Usage
 Known issues
 ============
 
-If you experience frequent ``DelegateError``s you may need to update your version
+If you experience frequent ``DelegateError`` errors you may need to update your version
 of GhostScript.
