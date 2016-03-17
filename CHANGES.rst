@@ -1,6 +1,6 @@
 ..
     This file is part of plotextractor.
-    Copyright (C) 2015 CERN.
+    Copyright (C) 2015, 2016 CERN.
 
     plotextractor is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -23,6 +23,11 @@
 
 Changes
 =======
+
+Version 0.1.3 (2016-03-17)
+
+- Properly supports cases where images are located in
+  a nested folder inside the extracted tarballs root folder.
 
 Version 0.1.2 (2015-12-08)
 

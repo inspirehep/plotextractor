@@ -1,6 +1,6 @@
 ..
     This file is part of plotextractor.
-    Copyright (C) 2015 CERN.
+    Copyright (C) 2015, 2016 CERN.
 
     plotextractor is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -31,7 +31,7 @@ Small library for converting and mapping plots in TeX source used in scholarly c
 * Free software: GPLv2
 * Documentation: http://pythonhosted.org/plotextractor/
 
-*Originally exported from Invenio https://github.com/inveniosoftware/invenio.*
+*Originally part of Invenio https://github.com/inveniosoftware/invenio.*
 
 Installation
 ============
@@ -39,7 +39,6 @@ Installation
 .. code-block:: shell
 
     pip install plotextractor
-
 
 
 Usage
@@ -56,3 +55,10 @@ Usage
         'name': 'd15-120f3d',
         'label': 'fig:mass'
     }
+
+
+Known issues
+============
+
+If you experience frequent ``DelegateError``s you may need to update your version
+of GhostScript.

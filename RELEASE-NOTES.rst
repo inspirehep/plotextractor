@@ -1,8 +1,8 @@
 ===================================
- plotextractor v0.1.2 is released
+ plotextractor v0.1.3 is released
 ===================================
 
-plotextractor v0.1.2 was released on 2015-12-08
+plotextractor v0.1.3 was released on 2016-03-17
 
 About
 -----
@@ -12,15 +12,13 @@ Small library for extracting plots used in scholarly communication.
 What's new
 ----------
 
-- Adds wrapfigure support.
-- Catches problems with image conversions.
-- More robust handling of image rotations in TeX sources.
-- Removes unicode_literals usage.
+- Properly supports cases where images are located in
+  a nested folder inside the extracted tarballs root folder.
 
 Installation
 ------------
 
-   $ pip install plotextractor==0.1.2
+   $ pip install plotextractor==0.1.3
 
 Documentation
 -------------
