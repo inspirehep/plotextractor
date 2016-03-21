@@ -258,40 +258,17 @@ def get_image_location(image, sdir, image_list, recurred=False):
         image_list = os.listdir(sdir)
 
     for png_image in image_list:
-        img_dir, img_name = os.path.split(png_image)
-        if converted_image_should_be == img_name:
-            return os.path.join(img_dir, converted_image_should_be)
+        png_image_rel = os.path.relpath(png_image, start=sdir)
+        if converted_image_should_be == png_image_rel:
+            return png_image
 
-    # maybe it's in a subfolder called eps (TeX just understands that)
-    if os.path.isdir(os.path.join(sdir, 'eps')):
-        image_list = os.listdir(os.path.join(sdir, 'eps'))
-        for png_image in image_list:
-            if converted_image_should_be == png_image:
-                return os.path.join('eps', png_image)
-
-    if os.path.isdir(os.path.join(sdir, 'fig')):
-        image_list = os.listdir(os.path.join(sdir, 'fig'))
-        for png_image in image_list:
-            if converted_image_should_be == png_image:
-                return os.path.join('fig', png_image)
-
-    if os.path.isdir(os.path.join(sdir, 'figs')):
-        image_list = os.listdir(os.path.join(sdir, 'figs'))
-        for png_image in image_list:
-            if converted_image_should_be == png_image:
-                return os.path.join('figs', png_image)
-
-    if os.path.isdir(os.path.join(sdir, 'Figures')):
-        image_list = os.listdir(os.path.join(sdir, 'Figures'))
-        for png_image in image_list:
-            if converted_image_should_be == png_image:
-                return os.path.join('Figures', png_image)
-
-    if os.path.isdir(os.path.join(sdir, 'Figs')):
-        image_list = os.listdir(os.path.join(sdir, 'Figs'))
-        for png_image in image_list:
-            if converted_image_should_be == png_image:
-                return os.path.join('Figs', png_image)
+    # maybe it's in a subfolder (TeX just understands that)
+    for prefix in ['eps', 'fig', 'figs', 'Figures', 'Figs', 'images']:
+        if os.path.isdir(os.path.join(sdir, prefix)):
+            image_list = os.listdir(os.path.join(sdir, prefix))
+            for png_image in image_list:
+                if converted_image_should_be == png_image:
+                    return os.path.join(sdir, prefix, png_image)
 
     # maybe it is actually just loose.
     for png_image in os.listdir(sdir):

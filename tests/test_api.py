@@ -55,6 +55,14 @@ def tarball_nested_folder():
                         '1603.04438v1.tar.gz')
 
 
+@pytest.fixture
+def tarball_nested_folder_rotation():
+    """Return path to testdata with images in a nested folder."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '1603.05617v1.tar.gz')
+
+
 def test_process_api(tarball_flat):
     """Test simple API for extracting and linking files to TeX."""
     plots = plotextractor.process_tarball(tarball_flat)
@@ -84,6 +92,17 @@ def test_process_api_with_nested(tarball_nested_folder):
     """Test simple API for extracting and linking files to TeX context."""
     plots = plotextractor.process_tarball(tarball_nested_folder, context=True)
     assert len(plots) == 9
+    assert "contexts" in plots[0]
+    assert "label" in plots[0]
+    assert "original_url" in plots[0]
+    assert "captions" in plots[0]
+    assert "name" in plots[0]
+
+
+def test_process_api_with_nested_rotation(tarball_nested_folder_rotation):
+    """Test simple API for extracting and linking files to TeX context."""
+    plots = plotextractor.process_tarball(tarball_nested_folder_rotation, context=True)
+    assert len(plots) == 30
     assert "contexts" in plots[0]
     assert "label" in plots[0]
     assert "original_url" in plots[0]
