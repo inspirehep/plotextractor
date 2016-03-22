@@ -24,6 +24,11 @@
 Changes
 =======
 
+Version 0.1.4 (2016-03-22)
+
+- Fixes linking images from TeX reference when images are referred
+  to without specifying full relative folder path.
+
 Version 0.1.3 (2016-03-17)
 
 - Properly supports cases where images are located in

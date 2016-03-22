@@ -1,8 +1,8 @@
 ===================================
- plotextractor v0.1.3 is released
+ plotextractor v0.1.4 is released
 ===================================
 
-plotextractor v0.1.3 was released on 2016-03-17
+plotextractor v0.1.4 was released on 2016-03-22
 
 About
 -----
@@ -12,13 +12,13 @@ Small library for extracting plots used in scholarly communication.
 What's new
 ----------
 
-- Properly supports cases where images are located in
-  a nested folder inside the extracted tarballs root folder.
+- Fixes linking images from TeX reference when images are referred
+  to without specifying full relative folder path.
 
 Installation
 ------------
 
-   $ pip install plotextractor==0.1.3
+   $ pip install plotextractor==0.1.4
 
 Documentation
 -------------
