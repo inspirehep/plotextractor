@@ -280,7 +280,7 @@ def get_image_location(image, sdir, image_list, recurred=False):
             sub_dir = os.path.join(sdir, png_image)
             for sub_dir_file in os.listdir(sub_dir):
                 if os.path.split(converted_image_should_be)[-1] == sub_dir_file:  # noqa
-                    return converted_image_should_be
+                    return os.path.join(sub_dir, converted_image_should_be)
 
     # maybe it's actually up a directory or two: this happens in nested
     # tarballs where the TeX is stored in a different directory from the images
