@@ -48,6 +48,14 @@ def tarball_rotation():
 
 
 @pytest.fixture
+def tarball_no_tex():
+    """Return path to testdata with no Tex files."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '1604.01763v2.tar.gz')
+
+
+@pytest.fixture
 def tarball_nested_folder():
     """Return path to testdata with images in a nested folder."""
     return os.path.join(os.path.dirname(__file__),
@@ -125,3 +133,9 @@ def test_process_api_invalid_text():
     with tempfile.NamedTemporaryFile() as f:
         with pytest.raises(plotextractor.errors.InvalidTarball):
             plotextractor.process_tarball(f.name)
+
+
+def test_process_api_no_tex(tarball_no_tex):
+    """Test simple API for extracting and linking files to TeX."""
+    with pytest.raises(plotextractor.errors.NoTexFilesFound):
+        plotextractor.process_tarball(tarball_no_tex)

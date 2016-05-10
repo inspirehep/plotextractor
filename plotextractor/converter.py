@@ -32,7 +32,7 @@ import re
 
 from subprocess32 import check_output, TimeoutExpired
 
-from wand.exceptions import MissingDelegateError
+from wand.exceptions import MissingDelegateError, ResourceLimitError
 from wand.image import Image
 
 from .errors import InvalidTarball
@@ -158,7 +158,7 @@ def convert_images(image_list, image_format="png", timeout=20):
             converted_image_file = get_converted_image_name(image_file)
             try:
                 convert_image(image_file, converted_image_file, image_format)
-            except MissingDelegateError:
+            except (MissingDelegateError, ResourceLimitError):
                 # Too bad, cannot convert image format.
                 continue
             if os.path.exists(converted_image_file):

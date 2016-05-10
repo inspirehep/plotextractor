@@ -72,7 +72,7 @@ def process_tarball(tarball, output_directory=None, context=False):
     image_list, tex_files = detect_images_and_tex(extracted_files_list)
 
     if tex_files == [] or tex_files is None:
-        return NoTexFilesFound("No TeX files found in {0}".format(tarball))
+        raise NoTexFilesFound("No TeX files found in {0}".format(tarball))
 
     converted_image_mapping = convert_images(image_list)
     return map_images_in_tex(
