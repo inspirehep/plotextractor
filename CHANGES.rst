@@ -24,6 +24,11 @@
 Changes
 =======
 
+Version 0.1.5 (2016-05-25)
+
+- Properly raises an exception when no TeX files are found in an archive.
+- More fixes to image path extraction and more robust image handling.
+
 Version 0.1.4 (2016-03-22)
 
 - Fixes linking images from TeX reference when images are referred
