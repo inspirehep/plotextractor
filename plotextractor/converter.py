@@ -128,11 +128,13 @@ def detect_images_and_tex(
 
 
 def convert_images(image_list, image_format="png", timeout=20):
-    """Figure out the types of the images that were extracted from
+    """Convert images from list of images to given format, if needed.
+
+    Figure out the types of the images that were extracted from
     the tarball and determine how to convert them into PNG.
 
     :param: image_list ([string, string, ...]): the list of image files
-        extracted from the tarball in step 1å
+        extracted from the tarball in step 1
     :param: image_format (string): which image format to convert to.
         (PNG by default)
     :param: timeout (int): the timeout value on shell commands.
@@ -144,6 +146,9 @@ def convert_images(image_list, image_format="png", timeout=20):
     image_mapping = {}
     for image_file in image_list:
         if os.path.isdir(image_file):
+            continue
+
+        if not os.path.exists(image_file):
             continue
 
         cmd_out = check_output(['file', image_file], timeout=timeout)
@@ -204,6 +209,9 @@ def rotate_image(filename, line, sdir, image_list):
         try:
             degrees = int(degrees)
         except (ValueError, TypeError):
+            return False
+
+        if not os.path.exists(file_loc):
             return False
 
         with Image(filename=file_loc) as image:
