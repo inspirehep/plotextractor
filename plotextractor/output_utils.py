@@ -263,7 +263,7 @@ def get_image_location(image, sdir, image_list, recurred=False):
             return png_image
 
     # maybe it's in a subfolder (TeX just understands that)
-    for prefix in ['eps', 'fig', 'figs', 'Figures', 'Figs', 'images']:
+    for prefix in ['eps', 'fig', 'figs', 'figures', 'figs', 'images']:
         if os.path.isdir(os.path.join(sdir, prefix)):
             image_list = os.listdir(os.path.join(sdir, prefix))
             for png_image in image_list:
