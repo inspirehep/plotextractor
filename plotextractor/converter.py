@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2010, 2011, 2015 CERN.
+# Copyright (C) 2010, 2011, 2015, 2016 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -30,6 +30,8 @@ import os
 import tarfile
 import re
 
+from time import time
+
 from subprocess32 import check_output, TimeoutExpired
 
 from wand.exceptions import MissingDelegateError, ResourceLimitError
@@ -54,6 +56,10 @@ def untar(original_tarball, output_directory):
         raise InvalidTarball
 
     tarball = tarfile.open(original_tarball)
+    # set mtimes of members to now
+    epochsecs = int(time())
+    for member in tarball.getmembers():
+        member.mtime = epochsecs
     tarball.extractall(output_directory)
 
     file_list = []
