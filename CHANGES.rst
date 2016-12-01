@@ -24,6 +24,11 @@
 Changes
 =======
 
+Version 0.1.6 (2016-12-01)
+
+- Sets the mtime for all members of the tarball to current time before
+  unpacking.
+
 Version 0.1.5 (2016-05-25)
 
 - Properly raises an exception when no TeX files are found in an archive.

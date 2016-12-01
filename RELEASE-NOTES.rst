@@ -1,8 +1,8 @@
 ===================================
- plotextractor v0.1.5 is released
+ plotextractor v0.1.6 is released
 ===================================
 
-plotextractor v0.1.5 was released on 2016-05-25
+plotextractor v0.1.6 was released on 2016-12-01
 
 About
 -----
@@ -12,13 +12,13 @@ Small library for extracting plots used in scholarly communication.
 What's new
 ----------
 
-- Properly raises an exception when no TeX files are found in an archive.
-- More fixes to image path extraction and more robust image handling.
+- Sets the mtime for all members of the tarball to current time before
+  unpacking.
 
 Installation
 ------------
 
-   $ pip install plotextractor==0.1.5
+   $ pip install plotextractor==0.1.6
 
 Documentation
 -------------
