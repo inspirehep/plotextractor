@@ -93,12 +93,7 @@ def detect_images_and_tex(
         list of images in the tarball and the name of the TeX file in the
         tarball.
     """
-    tex_output_contains = 'TeX'
     tex_file_extension = 'tex'
-
-    image_output_contains = 'image'
-    eps_output_contains = 'type eps'
-    ps_output_contains = 'Postscript'
 
     image_list = []
     might_be_tex = []
@@ -109,17 +104,12 @@ def detect_images_and_tex(
            or os.path.basename(extracted_file).startswith('.'):
             continue
 
-        magic_str = magic.from_file(extracted_file)
+        magic_str = magic.from_file(extracted_file, mime=True)
 
-        # Is it TeX?
-        if tex_output_contains in magic_str:
+        if "application/x-tex" == magic_str:
             might_be_tex.append(extracted_file)
-        # Is it an image?
-        elif magic_str.lower().find(image_output_contains) > -1 \
-                or \
-                magic_str.lower().find(eps_output_contains) > -1 \
-                or \
-                magic_str.find(ps_output_contains) > -1:
+        elif magic_str.startswith('image/') \
+                or "application/postscript" == magic_str:
             image_list.append(extracted_file)
 
         # If neither, maybe it is TeX or an image anyway, otherwise,
