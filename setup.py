@@ -37,6 +37,7 @@ requirements = [
     'six>=1.7.2',
     'subprocess32>=3.2.6',
     'Wand>=0.4.1',
+    'python-magic'
 ]
 
 test_requirements = [
