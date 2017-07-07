@@ -36,7 +36,11 @@ history = open('CHANGES.rst').read()
 requirements = [
     'six>=1.7.2',
     'subprocess32>=3.2.6',
-    'Wand>=0.4.1',
+    'Pillow>=4.3.0.dev0',
+]
+
+dependency_links = [
+    'git://github.com/kaplun/Pillow.git@showpage#egg=Pillow-4.3.0.dev0'
 ]
 
 test_requirements = [
@@ -108,6 +112,7 @@ setup(
         ],
         'tests': test_requirements
     },
+    dependency_links=dependency_links,
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',

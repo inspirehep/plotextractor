@@ -33,6 +33,7 @@ install:
   - pip install --upgrade pip
   - pip install coveralls check-manifest
   - pip install pytest pytest-pep8 pytest-cov pytest-cache
+  - pip install -r requirements.txt
   - pip install -e .[docs,tests]
 
 script:

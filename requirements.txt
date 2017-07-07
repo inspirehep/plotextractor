@@ -1,0 +1,1 @@
+-e git://github.com/kaplun/Pillow.git@showpage#egg=Pillow-4.3.0.dev0
