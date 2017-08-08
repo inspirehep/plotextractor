@@ -106,17 +106,17 @@ def detect_images_and_tex(
 
         magic_str = magic.from_file(extracted_file, mime=True)
 
-        if "application/x-tex" == magic_str:
+        if magic_str == "application/x-tex":
             might_be_tex.append(extracted_file)
         elif magic_str.startswith('image/') \
-                or "application/postscript" == magic_str:
+                or magic_str == "application/postscript":
             image_list.append(extracted_file)
 
         # If neither, maybe it is TeX or an image anyway, otherwise,
         # we don't care.
         else:
-            file_extension = os.path.basename(extracted_file)\
-                .split('.')[-1].lower()
+            _, dotted_file_extension = os.path.splitext(extracted_file)
+            file_extension = dotted_file_extension[1:]
 
             if file_extension == tex_file_extension:
                 might_be_tex.append(extracted_file)
