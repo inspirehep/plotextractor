@@ -34,8 +34,7 @@ from time import time
 
 from subprocess32 import check_output, TimeoutExpired
 
-from wand.exceptions import MissingDelegateError, ResourceLimitError
-from wand.image import Image
+from PIL import Image
 
 from .errors import InvalidTarball
 from .output_utils import get_converted_image_name, get_image_location
@@ -55,27 +54,27 @@ def untar(original_tarball, output_directory):
     if not tarfile.is_tarfile(original_tarball):
         raise InvalidTarball
 
-    tarball = tarfile.open(original_tarball)
-    # set mtimes of members to now
-    epochsecs = int(time())
-    for member in tarball.getmembers():
-        member.mtime = epochsecs
-    tarball.extractall(output_directory)
+    with tarfile.open(original_tarball) as tarball:
+        # set mtimes of members to now
+        epochsecs = int(time())
+        for member in tarball.getmembers():
+            member.mtime = epochsecs
+        tarball.extractall(output_directory)
 
-    file_list = []
+        file_list = []
 
-    for extracted_file in tarball.getnames():
-        if extracted_file == '':
-            break
-        if extracted_file.startswith('./'):
-            extracted_file = extracted_file[2:]
-        # ensure we are actually looking at the right file
-        extracted_file = os.path.join(output_directory, extracted_file)
+        for extracted_file in tarball.getnames():
+            if extracted_file == '':
+                break
+            if extracted_file.startswith('./'):
+                extracted_file = extracted_file[2:]
+            # ensure we are actually looking at the right file
+            extracted_file = os.path.join(output_directory, extracted_file)
 
-        # Add to full list of extracted files
-        file_list.append(extracted_file)
+            # Add to full list of extracted files
+            file_list.append(extracted_file)
 
-    return file_list
+        return file_list
 
 
 def detect_images_and_tex(
@@ -162,14 +161,14 @@ def convert_images(image_list, image_format="png", timeout=20):
             # Already PNG
             image_mapping[image_file] = image_file
         else:
-            # we're just going to assume that ImageMagick can convert all
+            # we're just going to assume that Pillow can convert all
             # the image types that we may be faced with
             # for sure it can do EPS->PNG and JPG->PNG and PS->PNG
             # and PSTEX->PNG
             converted_image_file = get_converted_image_name(image_file)
             try:
                 convert_image(image_file, converted_image_file, image_format)
-            except (MissingDelegateError, ResourceLimitError):
+            except (KeyError, IOError):
                 # Too bad, cannot convert image format.
                 continue
             if os.path.exists(converted_image_file):
@@ -180,9 +179,8 @@ def convert_images(image_list, image_format="png", timeout=20):
 
 def convert_image(from_file, to_file, image_format):
     """Convert an image to given format."""
-    with Image(filename=from_file) as original:
-        with original.convert(image_format) as converted:
-            converted.save(filename=to_file)
+    with Image.open(from_file) as original:
+        original.save(to_file, image_format)
     return to_file
 
 
@@ -220,9 +218,8 @@ def rotate_image(filename, line, sdir, image_list):
         if not os.path.exists(file_loc):
             return False
 
-        with Image(filename=file_loc) as image:
-            with image.clone() as rotated:
-                rotated.rotate(degrees)
-                rotated.save(filename=file_loc)
-        return True
+        with Image.open(file_loc) as image:
+            rotated = image.rotate(degrees)
+            rotated.save(file_loc)
+            return True
     return False
