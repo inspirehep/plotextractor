@@ -34,6 +34,7 @@ from time import time
 
 from subprocess32 import check_output, TimeoutExpired
 
+import magic
 from wand.exceptions import MissingDelegateError, ResourceLimitError
 from wand.image import Image
 
@@ -92,42 +93,34 @@ def detect_images_and_tex(
         list of images in the tarball and the name of the TeX file in the
         tarball.
     """
-    tex_output_contains = 'TeX'
-
     tex_file_extension = 'tex'
-    image_output_contains = 'image'
-    eps_output_contains = '- type eps'
-    ps_output_contains = 'Postscript'
+
     image_list = []
     might_be_tex = []
+
     for extracted_file in file_list:
-        try:
-            cmd_out = check_output(['file', extracted_file], timeout=20)
-        except TimeoutExpired:
+        # Ignore directories and hidden (metadata) files
+        if os.path.isdir(extracted_file) \
+           or os.path.basename(extracted_file).startswith('.'):
             continue
 
-        # is it TeX?
-        if cmd_out.find(tex_output_contains) > -1:
-            might_be_tex.append(extracted_file)
+        magic_str = magic.from_file(extracted_file, mime=True)
 
-        # is it an image?
-        elif cmd_out.lower().find(image_output_contains) > cmd_out.find(':') \
-                or \
-                cmd_out.lower().find(eps_output_contains) > cmd_out.find(':')\
-                or \
-                cmd_out.find(ps_output_contains) > cmd_out.find(':'):
-            # we have "image" in the output, and it is not in the filename
-            # i.e. filename.ext: blah blah image blah blah
+        if magic_str == "application/x-tex":
+            might_be_tex.append(extracted_file)
+        elif magic_str.startswith('image/') \
+                or magic_str == "application/postscript":
             image_list.append(extracted_file)
 
-        # if neither, maybe it is TeX or an image anyway, otherwise,
-        # we don't care
+        # If neither, maybe it is TeX or an image anyway, otherwise,
+        # we don't care.
         else:
-            if extracted_file.split('.')[-1].lower() == tex_file_extension:
-                # we might have tex source!
+            _, dotted_file_extension = os.path.splitext(extracted_file)
+            file_extension = dotted_file_extension[1:]
+
+            if file_extension == tex_file_extension:
                 might_be_tex.append(extracted_file)
-            elif extracted_file.split('.')[-1] in allowed_image_types:
-                # we might have an image!
+            elif file_extension in allowed_image_types:
                 image_list.append(extracted_file)
 
     return image_list, might_be_tex
