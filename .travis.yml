@@ -24,6 +24,11 @@
 
 sudo: false
 
+addons:
+  apt:
+    packages:
+      - ghostscript
+
 language: python
 
 python:
