@@ -195,6 +195,8 @@ def prepare_image_data(extracted_image_data, output_directory,
         if not image_location or not os.path.exists(image_location) or \
                 len(image_location) < 3:
             continue
+
+        image_location = os.path.normpath(image_location)
         if image_location in img_list:
             if caption not in img_list[image_location]['captions']:
                 img_list[image_location]['captions'].append(caption)
