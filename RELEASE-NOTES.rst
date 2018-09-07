@@ -1,8 +1,8 @@
 ===================================
- plotextractor v0.2.0 is released
+ plotextractor v0.2.1 is released
 ===================================
 
-plotextractor v0.2.0 was released on 2018-02-07
+plotextractor v0.2.1 was released on 2018-09-07
 
 About
 -----
@@ -18,7 +18,7 @@ What's new
 Installation
 ------------
 
-   $ pip install plotextractor==0.2.0
+   $ pip install plotextractor==0.2.1
 
 Documentation
 -------------

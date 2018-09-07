@@ -24,6 +24,10 @@
 Changes
 =======
 
+Version 0.2.1 (2018-09-07)
+
+- Handle utf-8 in paths inside the tarball.
+
 Version 0.2.0 (2018-02-07)
 
 - Ignore hidden/metadata files in the tarball.
