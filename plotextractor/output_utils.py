@@ -226,7 +226,7 @@ def get_image_location(image, sdir, image_list, recurred=False):
         # image is a list, not good
         return None
 
-    image = str(image)
+    image = image.encode('utf-8', 'ignore')
     image = image.strip()
 
     figure_or_file = '(figure=|file=)'

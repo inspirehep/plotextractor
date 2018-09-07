@@ -302,7 +302,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                     commas_okay=commas_okay))
 
             for filename in filenames:
-                filename = str(filename)
+                filename = filename.encode('utf-8', 'ignore')
                 if cur_image == '':
                     cur_image = filename
                 elif type(cur_image) == list:
