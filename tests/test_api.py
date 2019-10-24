@@ -85,6 +85,39 @@ def test_process_api(tarball_flat):
     assert plots[0]["name"]
 
 
+def test_process_api_preserves_ordering_of_figures_with_one_source_file(tarball_flat):
+    plots = plotextractor.process_tarball(tarball_flat)
+    expected = [
+        'd15-120f1',
+        'd15-120f2',
+        'd15-120f3a',
+        'd15-120f3b',
+        'd15-120f3c',
+        'd15-120f3d',
+        'd15-120f4',
+        'd15-120f5',
+        'd15-120f6a',
+        'd15-120f6b',
+        'd15-120f6c',
+        'd15-120f6d',
+        'd15-120f6e',
+        'd15-120f7',
+        'd15-120f8',
+        'd15-120f9',
+        'd15-120f10',
+        'd15-120f11',
+        'd15-120f12a',
+        'd15-120f12b',
+        'd15-120f12c',
+        'd15-120f13'
+    ]
+    labels = [plot['name'] for plot in plots]
+
+    assert len(plots) == 22
+    assert expected == labels
+
+
+
 def test_process_api_with_context(tarball_flat):
     """Test simple API for extracting and linking files to TeX context."""
     plots = plotextractor.process_tarball(tarball_flat, context=True)
