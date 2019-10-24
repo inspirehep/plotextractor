@@ -24,6 +24,10 @@
 Changes
 =======
 
+Version 0.2.2 (2019-10-24)
+
+- Try to preserve the ordering of figures.
+
 Version 0.2.1 (2018-09-07)
 
 - Handle utf-8 in paths inside the tarball.
