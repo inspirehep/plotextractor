@@ -27,6 +27,8 @@ from __future__ import absolute_import, print_function
 import os
 import re
 
+from collections import OrderedDict
+
 
 def find_open_and_close_braces(line_index, start, brace, lines):
     """
@@ -182,7 +184,7 @@ def prepare_image_data(extracted_image_data, output_directory,
     :return extracted_image_data ([(string, string, list, list) ...],
         ...])) again the list of image data cleaned for output
     """
-    img_list = {}
+    img_list = OrderedDict()
     for image, caption, label in extracted_image_data:
         if not image or image == 'ERROR':
             continue

@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-sudo: false
+sudo: true
 
 addons:
   apt:
@@ -39,6 +39,8 @@ install:
   - pip install coveralls check-manifest
   - pip install pytest pytest-pep8 pytest-cov pytest-cache
   - pip install -e .[docs,tests]
+  # see https://stackoverflow.com/questions/52703123/override-default-imagemagick-policy-xml
+  - sudo sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
 
 script:
   - sphinx-build -qnNW docs docs/_build/html
