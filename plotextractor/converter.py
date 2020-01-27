@@ -37,6 +37,7 @@ from subprocess32 import check_output, TimeoutExpired
 import magic
 from wand.exceptions import MissingDelegateError, ResourceLimitError
 from wand.image import Image
+from wand.resource import limits
 
 from .errors import InvalidTarball
 from .output_utils import get_converted_image_name, get_image_location
@@ -173,8 +174,17 @@ def convert_images(image_list, image_format="png", timeout=20):
 
 def convert_image(from_file, to_file, image_format):
     """Convert an image to given format."""
+    memory_limit = limits['memory']
+    disk_limit = limits['disk']
+    # fix for weird situation which SOMETIMES
+    # (usualy on first file in  a record)
+    # limits resets to default value when used inside `with` block in here.
     with Image(filename=from_file) as original:
+        limits['memory'] = memory_limit
+        limits['disk'] = disk_limit
         with original.convert(image_format) as converted:
+            limits['memory'] = memory_limit
+            limits['disk'] = disk_limit
             converted.save(filename=to_file)
     return to_file
 
