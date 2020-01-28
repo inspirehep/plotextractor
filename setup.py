@@ -37,7 +37,7 @@ requirements = [
     'six>=1.7.2',
     'subprocess32>=3.2.6',
     'Wand>=0.4.1',
-    'python-magic'
+    'python-magic',
 ]
 
 test_requirements = [
@@ -47,9 +47,12 @@ test_requirements = [
     'pytest-pep8>=1.0.6',
 ]
 
+setup_requirements = [
+    'autosemver',
+]
+
 
 class PyTest(TestCommand):
-
     """PyTest Test."""
 
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -79,15 +82,10 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-# Get the version string. Cannot be done with import!
-g = {}
-with open(os.path.join('plotextractor', 'version.py'), 'rt') as fp:
-    exec(fp.read(), g)
-    version = g['__version__']
 
+# Get the version string. Cannot be done with import!
 setup(
     name='plotextractor',
-    version=version,
     description=__doc__,
     long_description=readme + '\n\n' + history,
     keywords='plots figures extraction TeX LaTeX',
@@ -101,6 +99,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms='any',
+    setup_requires=setup_requirements,
     install_requires=requirements,
     extras_require={
         'docs': [
@@ -124,4 +123,5 @@ setup(
     ],
     tests_require=test_requirements,
     cmdclass={'test': PyTest},
+    autosemver=True,
 )

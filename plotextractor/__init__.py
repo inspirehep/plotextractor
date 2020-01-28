@@ -27,9 +27,7 @@
 from __future__ import absolute_import, print_function
 
 from .api import process_tarball
-from .version import __version__
 
 __all__ = (
     "process_tarball",
-    "__version__"
 )
