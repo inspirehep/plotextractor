@@ -37,14 +37,13 @@ python:
 install:
   - pip install --upgrade pip
   - pip install coveralls check-manifest
-  - pip install pytest pytest-pep8 pytest-cov pytest-cache
+  - pip install pytest pytest-pep8 pytest-cov pytest-cache autosemver
   - pip install -e .[docs,tests]
   # see https://stackoverflow.com/questions/52703123/override-default-imagemagick-policy-xml
   - sudo sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
 
 script:
   - sphinx-build -qnNW docs docs/_build/html
-  - check-manifest
   - python setup.py test
 
 after_success:
