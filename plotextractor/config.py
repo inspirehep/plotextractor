@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2010, 2011, 2015 CERN.
+# Copyright (C) 2010, 2011, 2015, 2020 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -25,8 +25,6 @@
 # pylint: disable=C0301
 
 """Plotextractor configuration."""
-
-from __future__ import absolute_import, print_function
 
 
 # CFG_PLOTEXTRACTOR_DESY_BASE --

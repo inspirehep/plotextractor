@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2020 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import tempfile
@@ -69,6 +68,14 @@ def tarball_nested_folder_rotation():
     return os.path.join(os.path.dirname(__file__),
                         'data',
                         '1603.05617v1.tar.gz')
+
+
+@pytest.fixture
+def tarball_with_wrong_utf():
+    """Return path to testdata with images in a nested folder."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        'wrong_unicode_path.tar.gz')
 
 
 def test_process_api(tarball_flat):
@@ -172,3 +179,12 @@ def test_process_api_no_tex(tarball_no_tex):
     """Test simple API for extracting and linking files to TeX."""
     with pytest.raises(plotextractor.errors.NoTexFilesFound):
         plotextractor.process_tarball(tarball_no_tex)
+
+
+def test_process_tarball_with_wrong_utf_path_inside(tarball_with_wrong_utf):
+    """Test simple API for extracting and linking files to TeX context."""
+    plots = plotextractor.process_tarball(tarball_with_wrong_utf, context=True)
+    assert len(plots) == 1
+    assert "unicode_path.tar.gz_files/cute_cat.png" in plots[0]['url']
+    assert plots[0]['captions'] == ['słodki kociak!']
+    assert plots[0]['name'] == 'cute_cat'

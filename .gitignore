@@ -48,3 +48,10 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+env*/
+AUTHORS
+CHANGELOG
+.eggs
+.idea
+*gz_files

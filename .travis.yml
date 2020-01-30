@@ -32,12 +32,11 @@ addons:
 language: python
 
 python:
-  - '2.7'
+  - '3.6'
 
 install:
   - pip install --upgrade pip
-  - pip install coveralls check-manifest
-  - pip install pytest pytest-pep8 pytest-cov pytest-cache autosemver
+  - pip install coveralls autosemver
   - pip install -e .[docs,tests]
   # see https://stackoverflow.com/questions/52703123/override-default-imagemagick-policy-xml
   - sudo sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
@@ -58,6 +57,6 @@ deploy:
   password:
     secure: avJEoYVRle6qXsG5h32SCwPyUNQvIf120yF34RTsqzOemdi4K3Yt+96gu4hUc0yZnInSCcprD3SjQhMdrU6tLmURLG/CuVah9wmGJchAbaw2IVX5p2JerGOD318+0I6+pvKcgtxLoxYRegJvJSvpjsZoOFBFL/1Cy/WyXJl48GHjlXHzl/n+IIOhT2DC4SVGAIH9+95Rc98RsaYLjVeqCr+ZNNPkcJtcgzlVJYIcQVz4fZgBQfKVX4EDtvfCHIWgQa2njpbjRWbMF1Ozk0E9GQuu+bDpMRM4K9vSGlKizrSbQiVwt4niW/ltTmLLi6JLMUvn0NvfC1eS5AnkXBjJQY5BuC2ENdUOIda782oIW59OQoFmKn5dHqqTsC12xLTuAjO65/f5bp9n0AHewEFRDoIadK28ZbU3+w8Z1peOBcGVlwfZf9BAgzS4XmUf7F68552de7u/CeX19loc3OU5zvfqhseXYVcnAme7fbwFJQYI+AHh1P2IVbgtiwiM5mJ2rTvWpAvjII7M15Ehj+C0FAa9Wq6KznXPGptsN4mNn5/xYgdgftMb7phRFZBQXuNQg1qttlI+N1JwnvYZ5pUtGkZDup3ECqsDxgXftUvub5nnwSveV1LDhP5/xIVRP58KFJuVl5WwJhVLfOgeRgeCUW8IQL2s3Q9wHVGSTj+lPno=
   on:
-    python: 2.7
+    python: 3.6
     branch: master
   distribution: sdist

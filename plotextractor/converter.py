@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2010, 2011, 2015, 2016 CERN.
+# Copyright (C) 2010, 2011, 2015, 2016, 2020 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -24,7 +24,6 @@
 
 """Functions related to conversion and untarring."""
 
-from __future__ import absolute_import, print_function
 
 import os
 import tarfile
@@ -32,7 +31,7 @@ import re
 
 from time import time
 
-from subprocess32 import check_output, TimeoutExpired
+from subprocess import check_output
 
 import magic
 from wand.exceptions import MissingDelegateError, ResourceLimitError
@@ -101,6 +100,9 @@ def detect_images_and_tex(
 
     for extracted_file in file_list:
         # Ignore directories and hidden (metadata) files
+        if re.search(r'[\uD800-\uDFFF]', extracted_file):
+            # Illegal file path/name
+            continue
         if os.path.isdir(extracted_file) \
            or os.path.basename(extracted_file).startswith('.'):
             continue
@@ -142,7 +144,7 @@ def convert_images(image_list, image_format="png", timeout=20):
     :return: image_mapping ({new_image: original_image, ...]): The mapping of
         image files when all have been converted to PNG format.
     """
-    png_output_contains = 'PNG image'
+    png_output_contains = b'PNG image'
     image_mapping = {}
     for image_file in image_list:
         if os.path.isdir(image_file):
