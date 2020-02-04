@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2020 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, print_function, unicode_literals
 
 import six
 import plotextractor
@@ -31,6 +30,18 @@ import plotextractor
 def test_get_image_location_ok(tmpdir):
     image = "img/img.png"
     path = six.text_type(tmpdir.mkdir('img').join("img.png"))
+    image_list = [path]
+
+    assert path == plotextractor.output_utils.get_image_location(
+        image,
+        six.text_type(tmpdir),
+        image_list
+    )
+
+
+def test_get_image_location_unicode_path_ok(tmpdir):
+    image = "ąþð/→µŋ.png"
+    path = six.text_type(tmpdir.mkdir('ąþð').join("→µŋ.png"))
     image_list = [path]
 
     assert path == plotextractor.output_utils.get_image_location(
