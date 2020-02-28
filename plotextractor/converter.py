@@ -225,6 +225,7 @@ def rotate_image(filename, line, sdir, image_list):
         if not os.path.exists(file_loc):
             return False
 
+        degrees = -degrees  # ImageMagick and graphicx use opposite conventions
         with Image(filename=file_loc) as image:
             with image.clone() as rotated:
                 rotated.rotate(degrees)
