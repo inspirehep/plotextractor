@@ -205,7 +205,7 @@ def rotate_image(filename, line, sdir, image_list):
     :return: True if something was rotated
     """
     file_loc = get_image_location(filename, sdir, image_list)
-    degrees = re.findall('(angle=[-\\d]+|rotate=[-\\d]+)', line)
+    degrees = re.findall(r'(\bangle=-?[\d]+|\brotate=-?[\d]+)', line)
 
     if len(degrees) < 1:
         return False
