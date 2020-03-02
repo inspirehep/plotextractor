@@ -203,7 +203,7 @@ def rotate_image(filename, line, sdir, image_list):
     :return: True if something was rotated
     """
     file_loc = get_image_location(filename, sdir, image_list)
-    degrees = re.findall('(angle=[-\\d]+|rotate=[-\\d]+)', line)
+    degrees = re.findall(r'(\bangle=-?[\d]+|\brotate=-?[\d]+)', line)
 
     if len(degrees) < 1:
         return False
@@ -223,6 +223,7 @@ def rotate_image(filename, line, sdir, image_list):
         if not os.path.exists(file_loc):
             return False
 
+        degrees = -degrees  # ImageMagick and graphicx use opposite conventions
         with Image(filename=file_loc) as image:
             with image.clone() as rotated:
                 rotated.rotate(degrees)
