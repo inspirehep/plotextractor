@@ -358,6 +358,8 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
     :return: tex_location (string): the location of the other TeX file on
         disk or None if it is not found
     """
+    new_tex_name = str(new_tex_name)
+    current_tex_name = str(current_tex_name)
 
     tex_location = None
 
