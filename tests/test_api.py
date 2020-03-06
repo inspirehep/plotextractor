@@ -29,6 +29,7 @@ import tempfile
 
 import pytest
 import plotextractor
+from plotextractor import process_tarball
 
 
 @pytest.fixture
@@ -69,6 +70,14 @@ def tarball_nested_folder_rotation():
     return os.path.join(os.path.dirname(__file__),
                         'data',
                         '1603.05617v1.tar.gz')
+
+
+@pytest.fixture
+def tarball_utf():
+    """Return path to testdata with images in a nested folder."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '2003.02673.tar.gz')
 
 
 def test_process_api(tarball_flat):
@@ -115,7 +124,6 @@ def test_process_api_preserves_ordering_of_figures_with_one_source_file(tarball_
 
     assert len(plots) == 22
     assert expected == labels
-
 
 
 def test_process_api_with_context(tarball_flat):
@@ -172,3 +180,12 @@ def test_process_api_no_tex(tarball_no_tex):
     """Test simple API for extracting and linking files to TeX."""
     with pytest.raises(plotextractor.errors.NoTexFilesFound):
         plotextractor.process_tarball(tarball_no_tex)
+
+
+def test_process_tarball_with_utf_folder(tarball_utf):
+    """Tests tarball with utf - Shouldn't break"""
+    temporary_dir = tempfile.mkdtemp()
+    plots = process_tarball(
+        tarball_utf,
+        output_directory=temporary_dir
+    )
