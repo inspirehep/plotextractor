@@ -36,7 +36,7 @@ history = open('CHANGES.rst').read()
 requirements = [
     'six>=1.7.2',
     'subprocess32>=3.2.6',
-    'Wand>=0.4.1',
+    'Wand>=0.4.1,<=0.5.9',
     'python-magic',
 ]
 
@@ -48,7 +48,7 @@ test_requirements = [
 ]
 
 setup_requirements = [
-    'autosemver',
+    'autosemver==0.5.5',
 ]
 
 
