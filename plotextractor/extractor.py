@@ -257,7 +257,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         if line.find(doc_tail) > -1:
             break
 
-        """
+        r"""
         FIGURE -
         structure of a figure:
         \begin{figure}
@@ -337,7 +337,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                         break
                     already_tried.append(filename)
 
-        """
+        r"""
         INCLUDEGRAPHICS -
         structure of includegraphics:
         \includegraphics[someoptions]{FILENAME}
@@ -357,7 +357,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             else:
                 cur_image = ['', [cur_image, filename]]
 
-        """
+        r"""
         {\input{FILENAME}}
         \caption{CAPTION}
 
@@ -401,7 +401,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             # FIXME
             pass
 
-        """
+        r"""
         CAPTIONS -
         structure of a caption:
         \caption[someoptions]{CAPTION}
@@ -432,7 +432,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             elif caption != cur_caption:
                 caption = ['', [caption, cur_caption]]
 
-        """
+        r"""
         SUBFIGURES -
         structure of a subfigure (inside a figure tag):
         \subfigure[CAPTION]{
@@ -487,7 +487,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
 
             cur_image[SUB_CAPTION_OR_IMAGE].append(sub_image)
 
-        """
+        r"""
         LABELS -
         structure of a label:
         \label{somelabelnamewhichprobablyincludesacolon}
@@ -765,10 +765,10 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
         valid_for_filename = '\\s*[A-Za-z0-9\\-\\=\\+/\\\\_\\.%#]+'
 
     if ext:
-        valid_for_filename += '\.e*ps[texfi2]*'
+        valid_for_filename += r'\.e*ps[texfi2]*'
 
     if TeX:
-        valid_for_filename += '[\.latex]*'
+        valid_for_filename += r'[\.latex]*'
 
     file_inclusion = re.findall('=' + valid_for_filename + '[ ,]', line)
 
