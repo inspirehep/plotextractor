@@ -79,6 +79,13 @@ def tarball_utf():
                         'data',
                         '2003.02673.tar.gz')
 
+@pytest.fixture
+def tarball_subfloat():
+    """Return path to testdata with subfloats."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '2203.14536.tar.gz')
+
 
 def test_process_api(tarball_flat):
     """Test simple API for extracting and linking files to TeX."""
@@ -163,6 +170,16 @@ def test_process_api_with_image_rotation(tarball_rotation):
     """Test simple API for extracting and linking files to TeX context."""
     plots = plotextractor.process_tarball(tarball_rotation)
     assert len(plots) == 22
+    assert "label" in plots[0]
+    assert "original_url" in plots[0]
+    assert "captions" in plots[0]
+    assert "name" in plots[0]
+
+
+def test_process_api_with_subfloats(tarball_subfloat):
+    """Test simple API for extracting and linking files to TeX context."""
+    plots = plotextractor.process_tarball(tarball_subfloat)
+    assert len(plots) == 24
     assert "label" in plots[0]
     assert "original_url" in plots[0]
     assert "captions" in plots[0]

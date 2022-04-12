@@ -433,51 +433,26 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                 caption = ['', [caption, cur_caption]]
 
         """
-        SUBFLOATS -
-        structure of a subfloat (inside of a figure tag):
-        \subfloat[CAPTION]{options{FILENAME}}
-
-        also associated with the overall caption of the enclosing figure
-        """
-
-        index = line.find(subfloat_head)
-        if index > -1:
-            # if we are dealing with subfloats, we need a different
-            # sort of structure to keep track of captions and subcaptions
-            if not isinstance(cur_image, list):
-                cur_image = [cur_image, []]
-            if not isinstance(caption, list):
-                caption = [caption, []]
-
-            open_square, open_square_line, close_square, close_square_line = \
-                find_open_and_close_braces(line_index, index, '[', lines)
-            cap_begin = open_square + 1
-
-            sub_caption = assemble_caption(
-                open_square_line,
-                cap_begin, close_square_line, close_square, lines)
-            caption[SUB_CAPTION_OR_IMAGE].append(sub_caption)
-
-            open_curly, open_curly_line, close_curly, dummy = \
-                find_open_and_close_braces(close_square_line,
-                                           close_square, '{', lines)
-            sub_image = lines[open_curly_line][open_curly + 1:close_curly]
-
-            cur_image[SUB_CAPTION_OR_IMAGE].append(sub_image)
-
-        """
         SUBFIGURES -
         structure of a subfigure (inside a figure tag):
         \subfigure[CAPTION]{
         \includegraphics[options]{FILENAME}}
 
+        or
+
+        SUBFLOATS -
+        structure of a subfloat (inside of a figure tag):
+        \subfloat[CAPTION]{
+        \includegraphics[options]{FILENAME}}
+
+
         also associated with the overall caption of the enclosing figure
         """
 
-        index = line.find(subfig_head)
+        index = max([line.find(subfloat_head), line.find(subfig_head)])
         if index > -1:
-            # like with subfloats, we need a different structure for keepin
-            # track of this stuff
+            # we need a different structure for keeping track of several
+            # captions and images
             if type(cur_image) != list:
                 cur_image = [cur_image, []]
             if type(caption) != list:
