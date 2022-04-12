@@ -42,7 +42,7 @@ test_requirements = [
     'coverage>=4.0.0',
     'pytest>=2.8.0',
     'pytest-cov>=2.1.0',
-    'pytest-pep8>=1.0.6',
+    'pycodestyle>=2.8.0',
 ]
 
 setup_requirements = [
