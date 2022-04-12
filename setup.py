@@ -36,6 +36,7 @@ history = open('CHANGES.rst').read()
 requirements = [
     'Wand>=0.4.1',
     'python-magic',
+    'six',
 ]
 
 test_requirements = [
