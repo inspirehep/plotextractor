@@ -198,6 +198,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
     subfloat_head = u'\\subfloat'
     subfig_head = u'\\subfigure'
     includegraphics_head = u'\\includegraphics'
+    include_head = r'\\include(?!graphics)'  # matches only \include{}
     epsfig_head = u'\\epsfig'
     input_head = u'\\input'
     # possible caption lead-ins
@@ -365,6 +366,26 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         """
         index = line.find(input_head)
         if index > -1:
+            new_tex_names = intelligently_find_filenames(
+                line, TeX=True,
+                commas_okay=commas_okay)
+            for new_tex_name in new_tex_names:
+                if new_tex_name != 'ERROR':
+                    new_tex_file = get_tex_location(new_tex_name, tex_file)
+                    if new_tex_file and primary:  # to kill recursion
+                        extracted_image_data.extend(extract_captions(
+                            new_tex_file, sdir,
+                            image_list,
+                            primary=False
+                        ))
+
+        r"""
+        INCLUDE -
+        structure of include:
+        \include{FILENAME}
+        """
+        index = re.match(include_head, line)
+        if index:
             new_tex_names = intelligently_find_filenames(
                 line, TeX=True,
                 commas_okay=commas_okay)
