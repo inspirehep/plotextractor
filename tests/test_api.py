@@ -41,6 +41,14 @@ def tarball_flat():
 
 
 @pytest.fixture
+def tarball_test_for_include():
+    """Return path to testdata with include tags."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '2207.tar.gz')
+
+
+@pytest.fixture
 def tarball_rotation():
     """Return path to testdata with an image file with rotation."""
     return os.path.join(os.path.dirname(__file__),
@@ -206,3 +214,14 @@ def test_process_tarball_with_utf_folder(tarball_utf):
         tarball_utf,
         output_directory=temporary_dir
     )
+
+
+def test_process_api_with_include(tarball_test_for_include):
+    """Test simple API for including the plots for \include tag."""
+    plots = plotextractor.process_tarball(tarball_test_for_include, context=True)
+    assert len(plots) == 155
+    assert "contexts" in plots[0]
+    assert "label" in plots[0]
+    assert "original_url" in plots[0]
+    assert "captions" in plots[0]
+    assert "name" in plots[0]
