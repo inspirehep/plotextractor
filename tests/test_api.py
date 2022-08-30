@@ -71,6 +71,14 @@ def tarball_nested_folder_rotation():
 
 
 @pytest.fixture
+def tarball_test_for_include():
+    """Return path to testdata with include tags."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '2207.tar.gz')
+
+
+@pytest.fixture
 def tarball_with_wrong_utf():
     """Return path to testdata with images in a nested folder."""
     return os.path.join(os.path.dirname(__file__),
@@ -205,3 +213,14 @@ def test_process_tarball_with_wrong_utf_path_inside(tarball_with_wrong_utf):
     assert "unicode_path.tar.gz_files/cute_cat.png" in plots[0]['url']
     assert plots[0]['captions'] == ['słodki kociak!']
     assert plots[0]['name'] == 'cute_cat'
+
+
+def test_process_api_with_include(tarball_test_for_include):
+    """Test simple API for including the plots for \include tag."""
+    plots = plotextractor.process_tarball(tarball_test_for_include, context=True)
+    assert len(plots) == 155
+    assert "contexts" in plots[0]
+    assert "label" in plots[0]
+    assert "original_url" in plots[0]
+    assert "captions" in plots[0]
+    assert "name" in plots[0]
