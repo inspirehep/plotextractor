@@ -229,8 +229,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
 
     # are we using commas in filenames here?
     commas_okay = False
-
-    for dummy1, dummy2, filenames in \
+    for _, _, filenames in \
             os.walk(os.path.split(os.path.split(tex_file)[0])[0]):
         for filename in filenames:
             if filename.find(',') > -1:
@@ -305,8 +304,8 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                 filename = str(filename)
                 if cur_image == '':
                     cur_image = filename
-                elif type(cur_image) == list:
-                    if type(cur_image[SUB_CAPTION_OR_IMAGE]) == list:
+                elif isinstance(cur_image, list):
+                    if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
                         cur_image[SUB_CAPTION_OR_IMAGE].append(filename)
                     else:
                         cur_image[SUB_CAPTION_OR_IMAGE] = [filename]
@@ -349,8 +348,8 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             filename = lines[open_curly_line][open_curly + 1:close_curly]
             if cur_image == '':
                 cur_image = filename
-            elif type(cur_image) == list:
-                if type(cur_image[SUB_CAPTION_OR_IMAGE]) == list:
+            elif isinstance(cur_image, list):
+                if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
                     cur_image[SUB_CAPTION_OR_IMAGE].append(filename)
                 else:
                     cur_image[SUB_CAPTION_OR_IMAGE] = [filename]
@@ -444,8 +443,8 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
 
             if caption == '':
                 caption = cur_caption
-            elif type(caption) == list:
-                if type(caption[SUB_CAPTION_OR_IMAGE]) == list:
+            elif isinstance(caption, list):
+                if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
                     caption[SUB_CAPTION_OR_IMAGE].append(cur_caption)
                 else:
                     caption[SUB_CAPTION_OR_IMAGE] = [cur_caption]
@@ -473,9 +472,9 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         if index > -1:
             # we need a different structure for keeping track of several
             # captions and images
-            if type(cur_image) != list:
+            if not isinstance(cur_image, list):
                 cur_image = [cur_image, []]
-            if type(caption) != list:
+            if not isinstance(caption, list):
                 caption = [caption, []]
 
             open_square, open_square_line, close_square, close_square_line = \
@@ -582,7 +581,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
     :return: (cur_image, caption, extracted_image_data): the same arguments it
         was sent, processed appropriately
     """
-    if type(cur_image) == list:
+    if isinstance(cur_image, list):
         if cur_image[MAIN_CAPTION_OR_IMAGE] == 'ERROR':
             cur_image[MAIN_CAPTION_OR_IMAGE] = ''
         for image in cur_image[SUB_CAPTION_OR_IMAGE]:
@@ -591,7 +590,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
 
     if cur_image != '' and caption != '':
 
-        if type(cur_image) == list and type(caption) == list:
+        if isinstance(cur_image, list) and isinstance(caption, list):
 
             if cur_image[MAIN_CAPTION_OR_IMAGE] != '' and\
                     caption[MAIN_CAPTION_OR_IMAGE] != '':
@@ -599,14 +598,14 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
                     (cur_image[MAIN_CAPTION_OR_IMAGE],
                      caption[MAIN_CAPTION_OR_IMAGE],
                      context))
-            if type(cur_image[MAIN_CAPTION_OR_IMAGE]) == list:
+            if isinstance(cur_image[MAIN_CAPTION_OR_IMAGE], list):
                 # why is the main image a list?
                 # it's a good idea to attach the main caption to other
                 # things, but the main image can only be used once
                 cur_image[MAIN_CAPTION_OR_IMAGE] = ''
 
-            if type(cur_image[SUB_CAPTION_OR_IMAGE]) == list:
-                if type(caption[SUB_CAPTION_OR_IMAGE]) == list:
+            if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
+                if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
                     for index in \
                             range(len(cur_image[SUB_CAPTION_OR_IMAGE])):
                         if index < len(caption[SUB_CAPTION_OR_IMAGE]):
@@ -629,7 +628,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
                             (sub_image, long_caption, context))
 
             else:
-                if type(caption[SUB_CAPTION_OR_IMAGE]) == list:
+                if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
                     long_caption = caption[MAIN_CAPTION_OR_IMAGE]
                     for sub_cap in caption[SUB_CAPTION_OR_IMAGE]:
                         long_caption = long_caption + ' : ' + sub_cap
@@ -642,22 +641,22 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
                         (cur_image[SUB_CAPTION_OR_IMAGE],
                          caption[SUB_CAPTION_OR_IMAGE], context))
 
-        elif type(cur_image) == list:
+        elif isinstance(cur_image, list):
             if cur_image[MAIN_CAPTION_OR_IMAGE] != '':
                 extracted_image_data.append(
                     (cur_image[MAIN_CAPTION_OR_IMAGE], caption, context))
-            if type(cur_image[SUB_CAPTION_OR_IMAGE]) == list:
+            if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
                 for image in cur_image[SUB_CAPTION_OR_IMAGE]:
                     extracted_image_data.append((image, caption, context))
             else:
                 extracted_image_data.append(
                     (cur_image[SUB_CAPTION_OR_IMAGE], caption, context))
 
-        elif type(caption) == list:
+        elif isinstance(caption, list):
             if caption[MAIN_CAPTION_OR_IMAGE] != '':
                 extracted_image_data.append(
                     (cur_image, caption[MAIN_CAPTION_OR_IMAGE], context))
-            if type(caption[SUB_CAPTION_OR_IMAGE]) == list:
+            if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
                 # multiple caps for one image:
                 long_caption = caption[MAIN_CAPTION_OR_IMAGE]
                 for subcap in caption[SUB_CAPTION_OR_IMAGE]:
@@ -696,7 +695,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
                                            close_curly_line, close_curly,
                                            lines)
 
-                if type(cur_image) == list:
+                if isinstance(cur_image, list):
                     extracted_image_data.append(
                         (cur_image[MAIN_CAPTION_OR_IMAGE], caption, context))
                     for sub_img in cur_image[SUB_CAPTION_OR_IMAGE]:
@@ -716,7 +715,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
 
                 if m:
                     open_curly = m.start()
-                    open_curly, open_curly_line, close_curly,\
+                    open_curly, open_curly_line, close_curly, \
                         close_curly_line = find_open_and_close_braces(
                             line_index + searchforward, open_curly, '{', lines)
 
@@ -726,7 +725,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
                                                cap_begin, close_curly_line,
                                                close_curly, lines)
 
-                    if type(cur_image) == list:
+                    if isinstance(cur_image, list):
                         extracted_image_data.append(
                             (cur_image[MAIN_CAPTION_OR_IMAGE],
                              caption, context))
@@ -739,7 +738,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
                     break
 
         if caption == '':
-            if type(cur_image) == list:
+            if isinstance(cur_image, list):
                 extracted_image_data.append(
                     (cur_image[MAIN_CAPTION_OR_IMAGE], 'No caption found',
                      context))
@@ -751,7 +750,7 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
                     (cur_image, 'No caption found', context))
 
     elif caption != '' and cur_image == '':
-        if type(caption) == list:
+        if isinstance(caption, list):
             long_caption = caption[MAIN_CAPTION_OR_IMAGE]
             for subcap in caption[SUB_CAPTION_OR_IMAGE]:
                 long_caption = long_caption + ': ' + subcap

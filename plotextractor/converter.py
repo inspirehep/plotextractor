@@ -28,10 +28,13 @@
 import os
 import tarfile
 import re
-
+import sys
 from time import time
 
-from subprocess import check_output
+if sys.version_info[0] == 2:
+    from subprocess32 import check_output
+else:
+    from subprocess import check_output
 
 import magic
 from wand.exceptions import MissingDelegateError, ResourceLimitError
@@ -100,7 +103,8 @@ def detect_images_and_tex(
 
     for extracted_file in file_list:
         # Ignore directories and hidden (metadata) files
-        if re.search(r'[\uD800-\uDFFF]', extracted_file):
+        if (re.search(r'[\uD800-\uDFFF]', extracted_file)
+                and sys.version_info[0] == 3):
             # Illegal file path/name
             continue
         if os.path.isdir(extracted_file) \

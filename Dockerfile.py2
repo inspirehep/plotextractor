@@ -1,0 +1,12 @@
+FROM python:2.7.18-buster AS plotextractor-py2-tests
+
+ARG APP_HOME=/code
+WORKDIR ${APP_HOME}
+
+COPY . .
+
+RUN apt-get update -y && apt-get install -y ghostscript
+
+RUN pip install -e .[tests]
+
+CMD ["/bin/bash"]

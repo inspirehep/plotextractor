@@ -41,7 +41,7 @@ def test_get_image_location_ok(tmpdir):
 
 def test_get_image_location_unicode_path_ok(tmpdir):
     image = "ąþð/→µŋ.png"
-    path = six.text_type(tmpdir.mkdir('ąþð').join("→µŋ.png"))
+    path = six.text_type(tmpdir.mkdir(six.ensure_text('ąþð')).join(six.ensure_text("→µŋ.png")))
     image_list = [path]
 
     assert path == plotextractor.output_utils.get_image_location(
