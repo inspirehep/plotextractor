@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2010, 2011, 2014, 2015 CERN.
+# Copyright (C) 2010, 2011, 2014, 2015, 2020 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -24,7 +24,6 @@
 
 """Plot extractor extractor."""
 
-from __future__ import absolute_import, print_function
 
 import codecs
 import os
@@ -303,7 +302,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                     commas_okay=commas_okay))
 
             for filename in filenames:
-                filename = filename.encode('utf-8', 'ignore')
+                filename = str(filename)
                 if cur_image == '':
                     cur_image = filename
                 elif type(cur_image) == list:

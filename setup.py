@@ -62,10 +62,7 @@ class PyTest(TestCommand):
         """Init pytest."""
         TestCommand.initialize_options(self)
         self.pytest_args = []
-        try:
-            from ConfigParser import ConfigParser
-        except ImportError:
-            from configparser import ConfigParser
+        from configparser import ConfigParser
         config = ConfigParser()
         config.read('pytest.ini')
         self.pytest_args = config.get('pytest', 'addopts').split(' ')
@@ -115,12 +112,11 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Programming Language :: Python',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+
     ],
     tests_require=test_requirements,
     cmdclass={'test': PyTest},

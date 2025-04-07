@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2010, 2011, 2014, 2015, 2016 CERN.
+# Copyright (C) 2010, 2011, 2014, 2015, 2016, 2020 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, print_function
 
 import os
 import re
@@ -227,8 +226,7 @@ def get_image_location(image, sdir, image_list, recurred=False):
     if isinstance(image, list):
         # image is a list, not good
         return None
-
-    image = image.encode('utf-8', 'ignore')
+    image = str(image)
     image = image.strip()
 
     figure_or_file = '(figure=|file=)'

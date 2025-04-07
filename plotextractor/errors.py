@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2020 CERN.
 #
 # plotextractor is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -23,8 +23,6 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 """Custom exceptions."""
-
-from __future__ import absolute_import, print_function
 
 
 class InvalidTarball(Exception):
