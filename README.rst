@@ -1,6 +1,6 @@
 ..
     This file is part of plotextractor.
-    Copyright (C) 2015, 2016, 2018 CERN.
+    Copyright (C) 2015, 2016, 2018 CERN. 
 
     plotextractor is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
