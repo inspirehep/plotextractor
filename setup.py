@@ -48,7 +48,7 @@ test_requirements = [
 setup(
     name='plotextractor',
     description=__doc__,
-    long_description=readme,
+    long_description="A small library for extracting plots used in scholarly communication.",
     keywords='plots figures extraction TeX LaTeX',
     license='GPLv2',
     author='CERN',
