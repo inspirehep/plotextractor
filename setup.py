@@ -81,5 +81,5 @@ setup(
 
     ],
     tests_require=test_requirements,
-    version="1.0.11",
+    version="1.0.12",
 )
