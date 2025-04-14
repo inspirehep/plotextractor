@@ -30,3 +30,5 @@ from .api import process_tarball
 __all__ = (
     "process_tarball",
 )
+
+__version__ = "1.0.10"
