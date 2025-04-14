@@ -25,9 +25,12 @@
 
 import os
 import tempfile
+import sys
+import six
 
 import pytest
 import plotextractor
+from plotextractor import process_tarball
 
 
 @pytest.fixture
@@ -68,6 +71,13 @@ def tarball_nested_folder_rotation():
     return os.path.join(os.path.dirname(__file__),
                         'data',
                         '1603.05617v1.tar.gz')
+
+@pytest.fixture
+def tarball_utf():
+    """Return path to testdata with images in a nested folder."""
+    return os.path.join(os.path.dirname(__file__),
+                        'data',
+                        '2003.02673.tar.gz')
 
 
 @pytest.fixture
@@ -139,7 +149,6 @@ def test_process_api_preserves_ordering_of_figures_with_one_source_file(tarball_
     assert expected == labels
 
 
-
 def test_process_api_with_context(tarball_flat):
     """Test simple API for extracting and linking files to TeX context."""
     plots = plotextractor.process_tarball(tarball_flat, context=True)
@@ -206,12 +215,26 @@ def test_process_api_no_tex(tarball_no_tex):
         plotextractor.process_tarball(tarball_no_tex)
 
 
+def test_process_tarball_with_utf_folder(tarball_utf):
+    """Tests tarball with utf - Shouldn't break"""
+    temporary_dir = tempfile.mkdtemp()
+    plots = process_tarball(
+        tarball_utf,
+        output_directory=temporary_dir
+    )
+    assert len(plots) == 56
+
 def test_process_tarball_with_wrong_utf_path_inside(tarball_with_wrong_utf):
     """Test simple API for extracting and linking files to TeX context."""
-    plots = plotextractor.process_tarball(tarball_with_wrong_utf, context=True)
+
+    temporary_dir = tempfile.mkdtemp()
+    plots = plotextractor.process_tarball(tarball_with_wrong_utf,
+                                        temporary_dir,
+                                        context=True)
     assert len(plots) == 1
-    assert "unicode_path.tar.gz_files/cute_cat.png" in plots[0]['url']
-    assert plots[0]['captions'] == ['słodki kociak!']
+    assert temporary_dir+"/cute_cat.png" in plots[0]['url']
+    captions = six.ensure_text(plots[0]['captions'][0], encoding='utf-8')
+    assert captions == six.ensure_text('słodki kociak!', encoding='utf-8')
     assert plots[0]['name'] == 'cute_cat'
 
 

@@ -24,19 +24,17 @@
 
 """Small library for extracting plots used in scholarly communication."""
 
-import os
 import sys
 
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
 
-readme = open('README.rst').read()
-history = open('CHANGES.rst').read()
+readme = open('README.md').read()
 
 requirements = [
-    'Wand>=0.4.1',
+    'Wand>=0.4.1,<=0.5.9',
+    'subprocess32>=3.2.6',
     'python-magic',
-    'six',
+    'six>=1.7.2',
 ]
 
 test_requirements = [
@@ -46,44 +44,11 @@ test_requirements = [
     'pycodestyle>=2.8.0',
 ]
 
-setup_requirements = [
-    'autosemver',
-]
-
-
-class PyTest(TestCommand):
-    """PyTest Test."""
-
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        """Init pytest."""
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-        from configparser import ConfigParser
-        config = ConfigParser()
-        config.read('pytest.ini')
-        self.pytest_args = config.get('pytest', 'addopts').split(' ')
-
-    def finalize_options(self):
-        """Finalize pytest."""
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        """Run tests."""
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
-
-
 # Get the version string. Cannot be done with import!
 setup(
     name='plotextractor',
     description=__doc__,
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     keywords='plots figures extraction TeX LaTeX',
     license='GPLv2',
     author='CERN',
@@ -95,13 +60,8 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms='any',
-    setup_requires=setup_requirements,
     install_requires=requirements,
     extras_require={
-        'docs': [
-            'Sphinx>=1.3',
-            'sphinx_rtd_theme>=0.1.7'
-        ],
         'tests': test_requirements
     },
     classifiers=[
@@ -110,13 +70,15 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
 
     ],
     tests_require=test_requirements,
-    cmdclass={'test': PyTest},
-    autosemver=True,
 )

@@ -1,0 +1,43 @@
+name: Test Python 2
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - python: python2
+            pip: pip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: sudo apt-get update -y && sudo apt-get install -y ghostscript python2
+
+      - name: Fix ImageMagick GhostScript permissions
+        run: |
+          sudo sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
+
+      - name: Install python dependencies
+        run: |
+          wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
+          ${{ matrix.python }} get-pip.py
+          ${{ matrix.python }} -m ${{ matrix.pip }} install --user --upgrade pip
+          ${{ matrix.python }} -m ${{ matrix.pip }} --no-cache-dir install --user -e .[tests]
+
+      - name: Show python dependencies
+        run: |
+          ${{matrix.pip}} --version
+          ${{ matrix.python }} --version
+          ${{ matrix.pip }} freeze
+
+      - name: Run tests
+        run: |
+            pycodestyle plotextractor && pytest tests
+

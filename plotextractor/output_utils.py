@@ -25,6 +25,8 @@
 
 import os
 import re
+import sys
+import six
 
 from collections import OrderedDict
 
@@ -226,7 +228,7 @@ def get_image_location(image, sdir, image_list, recurred=False):
     if isinstance(image, list):
         # image is a list, not good
         return None
-    image = str(image)
+    image = image.decode('utf-8') if sys.version_info[0] == 2 else str(image)
     image = image.strip()
 
     figure_or_file = '(figure=|file=)'
@@ -356,6 +358,8 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
     :return: tex_location (string): the location of the other TeX file on
         disk or None if it is not found
     """
+    new_tex_name = str(new_tex_name)
+    current_tex_name = str(current_tex_name)
 
     tex_location = None
 
