@@ -9,6 +9,8 @@ RUN apt-get update -y && apt-get install -y ghostscript
 
 RUN sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
 
-RUN pip install -e .[tests]
+RUN pip install --no-cache-dir poetry
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-root
 
 CMD ["/bin/bash"]

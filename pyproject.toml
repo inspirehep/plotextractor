@@ -33,8 +33,14 @@ six = ">=1.7.2"
 
 [tool.poetry.dev-dependencies]
 coverage = ">=4.0.0"
-pytest = ">=2.8.0"
-pytest-cov = ">=2.1.0"
+pytest = [
+    { version = "^8.3.5", markers = "python_version >= '3.11' and python_version < '4.0'" },
+    { version = "~=4.0,>=4.6", markers = "python_version < '3.11'" }
+]
+pytest-cov = [
+    { version = "^5.0.0", markers = "python_version >= '3.11' and python_version < '4.0'" },
+    { version = "~=2.0,>=2.6.1", markers = "python_version < '3.11'" }
+]
 pycodestyle = ">=2.8.0"
 
 [tool.coverage.run]
@@ -44,5 +50,5 @@ include = ["plotextractor/*.py"]
 addopts = "--cov=plotextractor --cov-report=term-missing:skip-covered"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools >= 40.6.0", "wheel"]
+build-backend = "setuptools.build_meta"

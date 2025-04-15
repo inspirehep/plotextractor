@@ -29,7 +29,11 @@ jobs:
           wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
           ${{ matrix.python }} get-pip.py
           ${{ matrix.python }} -m ${{ matrix.pip }} install --user --upgrade pip
-          ${{ matrix.python }} -m ${{ matrix.pip }} --no-cache-dir install --user -e .[tests]
+          ${{ matrix.python }} -m ${{ matrix.pip }} install --upgrade pip
+          ${{ matrix.python }} -m ${{ matrix.pip }} install poetry
+          rm poetry.lock
+          ${{ matrix.python }} -m poetry lock 
+          ${{ matrix.python }} -m poetry install
 
       - name: Show python dependencies
         run: |
@@ -39,5 +43,5 @@ jobs:
 
       - name: Run tests
         run: |
-            pycodestyle plotextractor && pytest tests
+            poetry run pycodestyle plotextractor &&  poetry run pytest tests
 
