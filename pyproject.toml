@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "plotextractor"
+version = "1.0.13"
+description = "A small library for extracting plots used in scholarly communication."
+readme = "README.md"
+homepage = "https://github.com/inspirehep/plotextractor"
+license = "GPLv2"
+authors = [
+    "CERN <admin@inspirehep.net>"
+]
+packages = [
+  { include = "plotextractor" }
+]
+classifiers=[
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+    'Operating System :: OS Independent',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.11',
+
+]
+
+[tool.poetry.dependencies]
+python = ">=2.7,<2.8 || >=3.11,<4.0"
+Wand = ">=0.4.1,<=0.5.9"
+subprocess32 = ">=3.2.6"
+python-magic = "*"
+six = ">=1.7.2"
+
+
+[tool.poetry.dev-dependencies]
+coverage = ">=4.0.0"
+pytest = ">=2.8.0"
+pytest-cov = ">=2.1.0"
+pycodestyle = ">=2.8.0"
+
+[tool.coverage.run]
+include = ["plotextractor/*.py"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=plotextractor --cov-report=term-missing:skip-covered"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
