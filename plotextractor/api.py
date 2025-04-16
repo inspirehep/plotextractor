@@ -24,7 +24,6 @@
 
 """API for plotextractor utility."""
 
-
 import os
 
 from .extractor import (
@@ -75,23 +74,17 @@ def process_tarball(tarball, output_directory=None, context=False):
 
     converted_image_mapping = convert_images(image_list)
     return map_images_in_tex(
-        tex_files,
-        converted_image_mapping,
-        output_directory,
-        context
+        tex_files, converted_image_mapping, output_directory, context
     )
 
 
-def map_images_in_tex(tex_files, image_mapping,
-                      output_directory, context=False):
+def map_images_in_tex(tex_files, image_mapping, output_directory, context=False):
     """Return caption and context for image references found in TeX sources."""
     extracted_image_data = []
     for tex_file in tex_files:
         # Extract images, captions and labels based on tex file and images
         partly_extracted_image_data = extract_captions(
-            tex_file,
-            output_directory,
-            image_mapping.keys()
+            tex_file, output_directory, image_mapping.keys()
         )
         if partly_extracted_image_data:
             # Convert to dict, add proper filepaths and do various cleaning

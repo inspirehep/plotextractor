@@ -25,7 +25,6 @@
 
 import os
 import tempfile
-import sys
 import six
 
 import pytest
@@ -36,71 +35,55 @@ from plotextractor import process_tarball
 @pytest.fixture
 def tarball_flat():
     """Return path to testdata with a flat file hierarchy."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '1508.03176v1.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "1508.03176v1.tar.gz")
 
 
 @pytest.fixture
 def tarball_rotation():
     """Return path to testdata with an image file with rotation."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '1508.03176v1.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "1508.03176v1.tar.gz")
 
 
 @pytest.fixture
 def tarball_no_tex():
     """Return path to testdata with no Tex files."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '1604.01763v2.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "1604.01763v2.tar.gz")
 
 
 @pytest.fixture
 def tarball_nested_folder():
     """Return path to testdata with images in a nested folder."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '1603.04438v1.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "1603.04438v1.tar.gz")
 
 
 @pytest.fixture
 def tarball_nested_folder_rotation():
     """Return path to testdata with images in a nested folder."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '1603.05617v1.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "1603.05617v1.tar.gz")
+
 
 @pytest.fixture
 def tarball_utf():
     """Return path to testdata with images in a nested folder."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '2003.02673.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "2003.02673.tar.gz")
 
 
 @pytest.fixture
 def tarball_test_for_include():
     """Return path to testdata with include tags."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '2207.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "2207.tar.gz")
 
 
 @pytest.fixture
 def tarball_with_wrong_utf():
     """Return path to testdata with images in a nested folder."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        'wrong_unicode_path.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "wrong_unicode_path.tar.gz")
+
 
 @pytest.fixture
 def tarball_subfloat():
     """Return path to testdata with subfloats."""
-    return os.path.join(os.path.dirname(__file__),
-                        'data',
-                        '2203.14536.tar.gz')
+    return os.path.join(os.path.dirname(__file__), "data", "2203.14536.tar.gz")
 
 
 def test_process_api(tarball_flat):
@@ -120,30 +103,30 @@ def test_process_api(tarball_flat):
 def test_process_api_preserves_ordering_of_figures_with_one_source_file(tarball_flat):
     plots = plotextractor.process_tarball(tarball_flat)
     expected = [
-        'd15-120f1',
-        'd15-120f2',
-        'd15-120f3a',
-        'd15-120f3b',
-        'd15-120f3c',
-        'd15-120f3d',
-        'd15-120f4',
-        'd15-120f5',
-        'd15-120f6a',
-        'd15-120f6b',
-        'd15-120f6c',
-        'd15-120f6d',
-        'd15-120f6e',
-        'd15-120f7',
-        'd15-120f8',
-        'd15-120f9',
-        'd15-120f10',
-        'd15-120f11',
-        'd15-120f12a',
-        'd15-120f12b',
-        'd15-120f12c',
-        'd15-120f13'
+        "d15-120f1",
+        "d15-120f2",
+        "d15-120f3a",
+        "d15-120f3b",
+        "d15-120f3c",
+        "d15-120f3d",
+        "d15-120f4",
+        "d15-120f5",
+        "d15-120f6a",
+        "d15-120f6b",
+        "d15-120f6c",
+        "d15-120f6d",
+        "d15-120f6e",
+        "d15-120f7",
+        "d15-120f8",
+        "d15-120f9",
+        "d15-120f10",
+        "d15-120f11",
+        "d15-120f12a",
+        "d15-120f12b",
+        "d15-120f12c",
+        "d15-120f13",
     ]
-    labels = [plot['name'] for plot in plots]
+    labels = [plot["name"] for plot in plots]
 
     assert len(plots) == 22
     assert expected == labels
@@ -218,24 +201,22 @@ def test_process_api_no_tex(tarball_no_tex):
 def test_process_tarball_with_utf_folder(tarball_utf):
     """Tests tarball with utf - Shouldn't break"""
     temporary_dir = tempfile.mkdtemp()
-    plots = process_tarball(
-        tarball_utf,
-        output_directory=temporary_dir
-    )
+    plots = process_tarball(tarball_utf, output_directory=temporary_dir)
     assert len(plots) == 56
+
 
 def test_process_tarball_with_wrong_utf_path_inside(tarball_with_wrong_utf):
     """Test simple API for extracting and linking files to TeX context."""
 
     temporary_dir = tempfile.mkdtemp()
-    plots = plotextractor.process_tarball(tarball_with_wrong_utf,
-                                        temporary_dir,
-                                        context=True)
+    plots = plotextractor.process_tarball(
+        tarball_with_wrong_utf, temporary_dir, context=True
+    )
     assert len(plots) == 1
-    assert temporary_dir+"/cute_cat.png" in plots[0]['url']
-    captions = six.ensure_text(plots[0]['captions'][0], encoding='utf-8')
-    assert captions == six.ensure_text('słodki kociak!', encoding='utf-8')
-    assert plots[0]['name'] == 'cute_cat'
+    assert temporary_dir + "/cute_cat.png" in plots[0]["url"]
+    captions = six.ensure_text(plots[0]["captions"][0], encoding="utf-8")
+    assert captions == six.ensure_text("słodki kociak!", encoding="utf-8")
+    assert plots[0]["name"] == "cute_cat"
 
 
 def test_process_api_with_include(tarball_test_for_include):

@@ -29,52 +29,49 @@ import plotextractor
 
 def test_get_image_location_ok(tmpdir):
     image = "img/img.png"
-    path = six.text_type(tmpdir.mkdir('img').join("img.png"))
+    path = six.text_type(tmpdir.mkdir("img").join("img.png"))
     image_list = [path]
 
     assert path == plotextractor.output_utils.get_image_location(
-        image,
-        six.text_type(tmpdir),
-        image_list
+        image, six.text_type(tmpdir), image_list
     )
 
 
 def test_get_image_location_unicode_path_ok(tmpdir):
     image = "ąþð/→µŋ.png"
-    path = six.text_type(tmpdir.mkdir(six.ensure_text('ąþð')).join(six.ensure_text("→µŋ.png")))
+    path = six.text_type(
+        tmpdir.mkdir(six.ensure_text("ąþð")).join(six.ensure_text("→µŋ.png"))
+    )
     image_list = [path]
 
     assert path == plotextractor.output_utils.get_image_location(
-        image,
-        six.text_type(tmpdir),
-        image_list
+        image, six.text_type(tmpdir), image_list
     )
 
 
 def test_get_image_location_missing_subfolder(tmpdir):
     image = "img.png"
-    path = tmpdir.mkdir('fig').join(image)
-    path.write('test')
+    path = tmpdir.mkdir("fig").join(image)
+    path.write("test")
     filepath = six.text_type(path)
     image_list = [filepath]
 
     assert filepath == plotextractor.output_utils.get_image_location(
-        image,
-        six.text_type(tmpdir),
-        image_list
+        image, six.text_type(tmpdir), image_list
     )
 
 
 def test_get_image_location_not_ok(tmpdir):
     image = "notanimage"
-    path = six.text_type(tmpdir.mkdir('images').join("some.img"))
+    path = six.text_type(tmpdir.mkdir("images").join("some.img"))
     image_list = [path]
 
-    assert plotextractor.output_utils.get_image_location(
-        image,
-        six.text_type(tmpdir),
-        image_list
-    ) is None
+    assert (
+        plotextractor.output_utils.get_image_location(
+            image, six.text_type(tmpdir), image_list
+        )
+        is None
+    )
 
 
 def test_get_image_location_includegraphics(tmpdir):
@@ -83,7 +80,5 @@ def test_get_image_location_includegraphics(tmpdir):
     image_list = [path]
 
     assert path == plotextractor.output_utils.get_image_location(
-        image,
-        six.text_type(tmpdir),
-        image_list
+        image, six.text_type(tmpdir), image_list
     )

@@ -34,15 +34,18 @@ from plotextractor.converter import detect_images_and_tex, untar
 
 def test_detect_images_and_tex_ignores_hidden_metadata_files():
     tarball_filename = pkg_resources.resource_filename(
-        __name__, os.path.join('data', '1704.02281.tar.gz'))
+        __name__, os.path.join("data", "1704.02281.tar.gz")
+    )
     try:
         temporary_dir = mkdtemp()
         file_list = untar(tarball_filename, temporary_dir)
         image_files, _ = detect_images_and_tex(file_list)
         # Ensure image_list doesn't contain a hidden or metadata file
         for f in image_files:
-            assert 'image' in magic.from_file(f).lower() \
-                or 'eps' in magic.from_file(f).lower() \
-                or 'Postscript' in magic.from_file(f)
+            assert (
+                "image" in magic.from_file(f).lower()
+                or "eps" in magic.from_file(f).lower()
+                or "Postscript" in magic.from_file(f)
+            )
     finally:
         rmtree(temporary_dir)
