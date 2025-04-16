@@ -24,7 +24,6 @@
 
 """Plot extractor extractor."""
 
-
 import codecs
 import os
 import re
@@ -44,8 +43,8 @@ from .output_utils import (
 from .converter import rotate_image
 
 
-ARXIV_HEADER = 'arXiv:'
-PLOTS_DIR = 'plots'
+ARXIV_HEADER = "arXiv:"
+PLOTS_DIR = "plots"
 
 MAIN_CAPTION_OR_IMAGE = 0
 SUB_CAPTION_OR_IMAGE = 1
@@ -94,7 +93,7 @@ def get_context(lines, backwards=False):
                 temp_word = ""
                 while len(context):
                     temp_word = context.pop()
-                    if '}' in temp_word:
+                    if "}" in temp_word:
                         break
             break
         context.append(word)
@@ -108,8 +107,7 @@ def get_context(lines, backwards=False):
         sentence_list.reverse()
 
     if len(sentence_list) > CFG_PLOTEXTRACTOR_CONTEXT_SENTENCE_LIMIT:
-        return " ".join(
-            sentence_list[:CFG_PLOTEXTRACTOR_CONTEXT_SENTENCE_LIMIT])
+        return " ".join(sentence_list[:CFG_PLOTEXTRACTOR_CONTEXT_SENTENCE_LIMIT])
     else:
         return " ".join(sentence_list)
 
@@ -140,10 +138,12 @@ def extract_context(tex_file, extracted_image_data):
         context_list = []
 
         # Generate a list of index tuples for all matches
-        indicies = [match.span()
-                    for match in re.finditer(r"(\\(?:fig|ref)\{%s\})" %
-                                             (re.escape(data['label']),),
-                                             lines)]
+        indicies = [
+            match.span()
+            for match in re.finditer(
+                r"(\\(?:fig|ref)\{%s\})" % (re.escape(data["label"]),), lines
+            )
+        ]
         for startindex, endindex in indicies:
             # Retrive all lines before label until beginning of file
             i = startindex - CFG_PLOTEXTRACTOR_CONTEXT_EXTRACT_LIMIT
@@ -158,10 +158,9 @@ def extract_context(tex_file, extracted_image_data):
             text_after = lines[endindex:i]
             context_after = get_context(text_after)
             context_list.append(
-                context_before + ' \\ref{' + data['label'] + '} ' +
-                context_after
+                context_before + " \\ref{" + data["label"] + "} " + context_after
             )
-        data['contexts'] = context_list
+        data["contexts"] = context_list
 
 
 def extract_captions(tex_file, sdir, image_list, primary=True):
@@ -189,33 +188,33 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
     lines = get_lines_from_file(tex_file)
 
     # possible figure lead-ins
-    figure_head = u'\\begin{figure'  # also matches figure*
-    figure_wrap_head = u'\\begin{wrapfigure'
-    figure_tail = u'\\end{figure'  # also matches figure*
-    figure_wrap_tail = u'\\end{wrapfigure'
-    picture_head = u'\\begin{picture}'
-    displaymath_head = u'\\begin{displaymath}'
-    subfloat_head = u'\\subfloat'
-    subfig_head = u'\\subfigure'
-    includegraphics_head = u'\\includegraphics'
-    include_head = r'\\include(?!graphics)'  # matches only \include{}
-    epsfig_head = u'\\epsfig'
-    input_head = u'\\input'
+    figure_head = "\\begin{figure"  # also matches figure*
+    figure_wrap_head = "\\begin{wrapfigure"
+    figure_tail = "\\end{figure"  # also matches figure*
+    figure_wrap_tail = "\\end{wrapfigure"
+    picture_head = "\\begin{picture}"
+    displaymath_head = "\\begin{displaymath}"
+    subfloat_head = "\\subfloat"
+    subfig_head = "\\subfigure"
+    includegraphics_head = "\\includegraphics"
+    include_head = r"\\include(?!graphics)"  # matches only \include{}
+    epsfig_head = "\\epsfig"
+    input_head = "\\input"
     # possible caption lead-ins
-    caption_head = u'\\caption'
-    figcaption_head = u'\\figcaption'
-    label_head = u'\\label'
-    rotate = u'rotate='
-    angle = u'angle='
-    eps_tail = u'.eps'
-    ps_tail = u'.ps'
+    caption_head = "\\caption"
+    figcaption_head = "\\figcaption"
+    label_head = "\\label"
+    rotate = "rotate="
+    angle = "angle="
+    eps_tail = ".eps"
+    ps_tail = ".ps"
 
-    doc_head = u'\\begin{document}'
-    doc_tail = u'\\end{document}'
+    doc_head = "\\begin{document}"
+    doc_tail = "\\end{document}"
 
     extracted_image_data = []
-    cur_image = ''
-    caption = ''
+    cur_image = ""
+    caption = ""
     labels = []
     active_label = ""
 
@@ -223,16 +222,15 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
     if primary:
         for line_index in range(len(lines)):
             if lines[line_index].find(doc_head) < 0:
-                lines[line_index] = ''
+                lines[line_index] = ""
             else:
                 break
 
     # are we using commas in filenames here?
     commas_okay = False
-    for _, _, filenames in \
-            os.walk(os.path.split(os.path.split(tex_file)[0])[0]):
+    for _, _, filenames in os.walk(os.path.split(os.path.split(tex_file)[0])[0]):
         for filename in filenames:
-            if filename.find(',') > -1:
+            if filename.find(",") > -1:
                 commas_okay = True
                 break
 
@@ -251,7 +249,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
     for line_index in range(len(lines)):
         line = lines[line_index]
 
-        if line == '':
+        if line == "":
             continue
         if line.find(doc_tail) > -1:
             break
@@ -273,36 +271,44 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             # just want to see if there is anything that is sitting outside
             # of it when we find it
             cur_image, caption, extracted_image_data = put_it_together(
-                cur_image, caption,
-                active_label, extracted_image_data,
-                line_index, lines)
+                cur_image,
+                caption,
+                active_label,
+                extracted_image_data,
+                line_index,
+                lines,
+            )
 
         # here, you jerks, just make it so that it's fecking impossible to
         # figure out your damn inclusion types
 
-        index = max([line.find(eps_tail), line.find(ps_tail),
-                     line.find(epsfig_head)])
+        index = max([line.find(eps_tail), line.find(ps_tail), line.find(epsfig_head)])
         if index > -1:
             if line.find(eps_tail) > -1 or line.find(ps_tail) > -1:
                 ext = True
             else:
                 ext = False
-            filenames = intelligently_find_filenames(line, ext=ext,
-                                                     commas_okay=commas_okay)
+            filenames = intelligently_find_filenames(
+                line, ext=ext, commas_okay=commas_okay
+            )
 
             # try to look ahead!  sometimes there are better matches after
             if line_index < len(lines) - 1:
-                filenames.extend(intelligently_find_filenames(
-                    lines[line_index + 1],
-                    commas_okay=commas_okay))
+                filenames.extend(
+                    intelligently_find_filenames(
+                        lines[line_index + 1], commas_okay=commas_okay
+                    )
+                )
             if line_index < len(lines) - 2:
-                filenames.extend(intelligently_find_filenames(
-                    lines[line_index + 2],
-                    commas_okay=commas_okay))
+                filenames.extend(
+                    intelligently_find_filenames(
+                        lines[line_index + 2], commas_okay=commas_okay
+                    )
+                )
 
             for filename in filenames:
                 filename = str(filename)
-                if cur_image == '':
+                if cur_image == "":
                     cur_image = filename
                 elif isinstance(cur_image, list):
                     if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
@@ -310,7 +316,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                     else:
                         cur_image[SUB_CAPTION_OR_IMAGE] = [filename]
                 else:
-                    cur_image = ['', [cur_image, filename]]
+                    cur_image = ["", [cur_image, filename]]
 
         """
         Rotate and angle
@@ -318,20 +324,23 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         index = max(line.find(rotate), line.find(angle))
         if index > -1:
             # which is the image associated to it?
-            filenames = intelligently_find_filenames(line,
-                                                     commas_okay=commas_okay)
+            filenames = intelligently_find_filenames(line, commas_okay=commas_okay)
             # try the line after and the line before
             if line_index + 1 < len(lines):
-                filenames.extend(intelligently_find_filenames(
-                    lines[line_index + 1],
-                    commas_okay=commas_okay))
+                filenames.extend(
+                    intelligently_find_filenames(
+                        lines[line_index + 1], commas_okay=commas_okay
+                    )
+                )
             if line_index > 1:
-                filenames.extend(intelligently_find_filenames(
-                    lines[line_index - 1],
-                    commas_okay=commas_okay))
+                filenames.extend(
+                    intelligently_find_filenames(
+                        lines[line_index - 1], commas_okay=commas_okay
+                    )
+                )
             already_tried = []
             for filename in filenames:
-                if filename != 'ERROR' and filename not in already_tried:
+                if filename != "ERROR" and filename not in already_tried:
                     if rotate_image(filename, line, sdir, image_list):
                         break
                     already_tried.append(filename)
@@ -343,10 +352,11 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         """
         index = line.find(includegraphics_head)
         if index > -1:
-            open_curly, open_curly_line, close_curly, dummy = \
-                find_open_and_close_braces(line_index, index, '{', lines)
-            filename = lines[open_curly_line][open_curly + 1:close_curly]
-            if cur_image == '':
+            open_curly, open_curly_line, close_curly, dummy = (
+                find_open_and_close_braces(line_index, index, "{", lines)
+            )
+            filename = lines[open_curly_line][open_curly + 1 : close_curly]
+            if cur_image == "":
                 cur_image = filename
             elif isinstance(cur_image, list):
                 if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
@@ -354,7 +364,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                 else:
                     cur_image[SUB_CAPTION_OR_IMAGE] = [filename]
             else:
-                cur_image = ['', [cur_image, filename]]
+                cur_image = ["", [cur_image, filename]]
 
         r"""
         {\input{FILENAME}}
@@ -366,17 +376,17 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         index = line.find(input_head)
         if index > -1:
             new_tex_names = intelligently_find_filenames(
-                line, TeX=True,
-                commas_okay=commas_okay)
+                line, TeX=True, commas_okay=commas_okay
+            )
             for new_tex_name in new_tex_names:
-                if new_tex_name != 'ERROR':
+                if new_tex_name != "ERROR":
                     new_tex_file = get_tex_location(new_tex_name, tex_file)
                     if new_tex_file and primary:  # to kill recursion
-                        extracted_image_data.extend(extract_captions(
-                            new_tex_file, sdir,
-                            image_list,
-                            primary=False
-                        ))
+                        extracted_image_data.extend(
+                            extract_captions(
+                                new_tex_file, sdir, image_list, primary=False
+                            )
+                        )
 
         r"""
         INCLUDE -
@@ -386,17 +396,17 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         index = re.match(include_head, line)
         if index:
             new_tex_names = intelligently_find_filenames(
-                line, TeX=True,
-                commas_okay=commas_okay)
+                line, TeX=True, commas_okay=commas_okay
+            )
             for new_tex_name in new_tex_names:
-                if new_tex_name != 'ERROR':
+                if new_tex_name != "ERROR":
                     new_tex_file = get_tex_location(new_tex_name, tex_file)
                     if new_tex_file and primary:  # to kill recursion
-                        extracted_image_data.extend(extract_captions(
-                            new_tex_file, sdir,
-                            image_list,
-                            primary=False
-                        ))
+                        extracted_image_data.extend(
+                            extract_captions(
+                                new_tex_file, sdir, image_list, primary=False
+                            )
+                        )
 
         """PICTURE"""
 
@@ -432,16 +442,17 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
 
         index = max([line.find(caption_head), line.find(figcaption_head)])
         if index > -1:
-            open_curly, open_curly_line, close_curly, close_curly_line = \
-                find_open_and_close_braces(line_index, index, '{', lines)
+            open_curly, open_curly_line, close_curly, close_curly_line = (
+                find_open_and_close_braces(line_index, index, "{", lines)
+            )
 
             cap_begin = open_curly + 1
 
             cur_caption = assemble_caption(
-                open_curly_line, cap_begin,
-                close_curly_line, close_curly, lines)
+                open_curly_line, cap_begin, close_curly_line, close_curly, lines
+            )
 
-            if caption == '':
+            if caption == "":
                 caption = cur_caption
             elif isinstance(caption, list):
                 if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
@@ -449,7 +460,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                 else:
                     caption[SUB_CAPTION_OR_IMAGE] = [cur_caption]
             elif caption != cur_caption:
-                caption = ['', [caption, cur_caption]]
+                caption = ["", [caption, cur_caption]]
 
         r"""
         SUBFIGURES -
@@ -477,13 +488,14 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             if not isinstance(caption, list):
                 caption = [caption, []]
 
-            open_square, open_square_line, close_square, close_square_line = \
-                find_open_and_close_braces(line_index, index, '[', lines)
+            open_square, open_square_line, close_square, close_square_line = (
+                find_open_and_close_braces(line_index, index, "[", lines)
+            )
             cap_begin = open_square + 1
 
-            sub_caption = assemble_caption(open_square_line,
-                                           cap_begin, close_square_line,
-                                           close_square, lines)
+            sub_caption = assemble_caption(
+                open_square_line, cap_begin, close_square_line, close_square, lines
+            )
             caption[SUB_CAPTION_OR_IMAGE].append(sub_caption)
 
             index_cpy = index
@@ -499,10 +511,10 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
                 # didn't find the image name on line
                 line_index = index_cpy
 
-            open_curly, open_curly_line, close_curly, dummy = \
-                find_open_and_close_braces(line_index,
-                                           index, '{', lines)
-            sub_image = lines[open_curly_line][open_curly + 1:close_curly]
+            open_curly, open_curly_line, close_curly, dummy = (
+                find_open_and_close_braces(line_index, index, "{", lines)
+            )
+            sub_image = lines[open_curly_line][open_curly + 1 : close_curly]
 
             cur_image[SUB_CAPTION_OR_IMAGE].append(sub_image)
 
@@ -522,10 +534,10 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         """
         index = line.find(label_head)
         if index > -1 and in_figure_tag:
-            open_curly, open_curly_line, close_curly, dummy =\
-                find_open_and_close_braces(line_index,
-                                           index, '{', lines)
-            label = lines[open_curly_line][open_curly + 1:close_curly]
+            open_curly, open_curly_line, close_curly, dummy = (
+                find_open_and_close_braces(line_index, index, "{", lines)
+            )
+            label = lines[open_curly_line][open_curly + 1 : close_curly]
             if label not in labels:
                 active_label = label
             labels.append(label)
@@ -537,17 +549,19 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         of the loop in case some pathological person puts everything in one
         line
         """
-        index = max([
-            line.find(figure_tail),
-            line.find(figure_wrap_tail),
-            line.find(doc_tail)
-        ])
+        index = max(
+            [line.find(figure_tail), line.find(figure_wrap_tail), line.find(doc_tail)]
+        )
         if index > -1:
             in_figure_tag = 0
-            cur_image, caption, extracted_image_data = \
-                put_it_together(cur_image, caption, active_label,
-                                extracted_image_data,
-                                line_index, lines)
+            cur_image, caption, extracted_image_data = put_it_together(
+                cur_image,
+                caption,
+                active_label,
+                extracted_image_data,
+                line_index,
+                lines,
+            )
         """
         END DOCUMENT
 
@@ -561,8 +575,9 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
     return extracted_image_data
 
 
-def put_it_together(cur_image, caption, context, extracted_image_data,
-                    line_index, lines):
+def put_it_together(
+    cur_image, caption, context, extracted_image_data, line_index, lines
+):
     """Put it together.
 
     Takes the current image(s) and caption(s) and assembles them into
@@ -582,100 +597,120 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
         was sent, processed appropriately
     """
     if isinstance(cur_image, list):
-        if cur_image[MAIN_CAPTION_OR_IMAGE] == 'ERROR':
-            cur_image[MAIN_CAPTION_OR_IMAGE] = ''
+        if cur_image[MAIN_CAPTION_OR_IMAGE] == "ERROR":
+            cur_image[MAIN_CAPTION_OR_IMAGE] = ""
         for image in cur_image[SUB_CAPTION_OR_IMAGE]:
-            if image == 'ERROR':
+            if image == "ERROR":
                 cur_image[SUB_CAPTION_OR_IMAGE].remove(image)
 
-    if cur_image != '' and caption != '':
-
+    if cur_image != "" and caption != "":
         if isinstance(cur_image, list) and isinstance(caption, list):
-
-            if cur_image[MAIN_CAPTION_OR_IMAGE] != '' and\
-                    caption[MAIN_CAPTION_OR_IMAGE] != '':
+            if (
+                cur_image[MAIN_CAPTION_OR_IMAGE] != ""
+                and caption[MAIN_CAPTION_OR_IMAGE] != ""
+            ):
                 extracted_image_data.append(
-                    (cur_image[MAIN_CAPTION_OR_IMAGE],
-                     caption[MAIN_CAPTION_OR_IMAGE],
-                     context))
+                    (
+                        cur_image[MAIN_CAPTION_OR_IMAGE],
+                        caption[MAIN_CAPTION_OR_IMAGE],
+                        context,
+                    )
+                )
             if isinstance(cur_image[MAIN_CAPTION_OR_IMAGE], list):
                 # why is the main image a list?
                 # it's a good idea to attach the main caption to other
                 # things, but the main image can only be used once
-                cur_image[MAIN_CAPTION_OR_IMAGE] = ''
+                cur_image[MAIN_CAPTION_OR_IMAGE] = ""
 
             if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
                 if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
-                    for index in \
-                            range(len(cur_image[SUB_CAPTION_OR_IMAGE])):
+                    for index in range(len(cur_image[SUB_CAPTION_OR_IMAGE])):
                         if index < len(caption[SUB_CAPTION_OR_IMAGE]):
-                            long_caption = \
-                                caption[MAIN_CAPTION_OR_IMAGE] + ' : ' + \
-                                caption[SUB_CAPTION_OR_IMAGE][index]
+                            long_caption = (
+                                caption[MAIN_CAPTION_OR_IMAGE]
+                                + " : "
+                                + caption[SUB_CAPTION_OR_IMAGE][index]
+                            )
                         else:
-                            long_caption = \
-                                caption[MAIN_CAPTION_OR_IMAGE] + ' : ' + \
-                                'Caption not extracted'
+                            long_caption = (
+                                caption[MAIN_CAPTION_OR_IMAGE]
+                                + " : "
+                                + "Caption not extracted"
+                            )
                         extracted_image_data.append(
-                            (cur_image[SUB_CAPTION_OR_IMAGE][index],
-                             long_caption, context))
+                            (
+                                cur_image[SUB_CAPTION_OR_IMAGE][index],
+                                long_caption,
+                                context,
+                            )
+                        )
 
                 else:
-                    long_caption = caption[MAIN_CAPTION_OR_IMAGE] + \
-                        ' : ' + caption[SUB_CAPTION_OR_IMAGE]
+                    long_caption = (
+                        caption[MAIN_CAPTION_OR_IMAGE]
+                        + " : "
+                        + caption[SUB_CAPTION_OR_IMAGE]
+                    )
                     for sub_image in cur_image[SUB_CAPTION_OR_IMAGE]:
-                        extracted_image_data.append(
-                            (sub_image, long_caption, context))
+                        extracted_image_data.append((sub_image, long_caption, context))
 
             else:
                 if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
                     long_caption = caption[MAIN_CAPTION_OR_IMAGE]
                     for sub_cap in caption[SUB_CAPTION_OR_IMAGE]:
-                        long_caption = long_caption + ' : ' + sub_cap
+                        long_caption = long_caption + " : " + sub_cap
                     extracted_image_data.append(
-                        (cur_image[SUB_CAPTION_OR_IMAGE], long_caption,
-                         context))
+                        (cur_image[SUB_CAPTION_OR_IMAGE], long_caption, context)
+                    )
                 else:
                     # wtf are they lists for?
                     extracted_image_data.append(
-                        (cur_image[SUB_CAPTION_OR_IMAGE],
-                         caption[SUB_CAPTION_OR_IMAGE], context))
+                        (
+                            cur_image[SUB_CAPTION_OR_IMAGE],
+                            caption[SUB_CAPTION_OR_IMAGE],
+                            context,
+                        )
+                    )
 
         elif isinstance(cur_image, list):
-            if cur_image[MAIN_CAPTION_OR_IMAGE] != '':
+            if cur_image[MAIN_CAPTION_OR_IMAGE] != "":
                 extracted_image_data.append(
-                    (cur_image[MAIN_CAPTION_OR_IMAGE], caption, context))
+                    (cur_image[MAIN_CAPTION_OR_IMAGE], caption, context)
+                )
             if isinstance(cur_image[SUB_CAPTION_OR_IMAGE], list):
                 for image in cur_image[SUB_CAPTION_OR_IMAGE]:
                     extracted_image_data.append((image, caption, context))
             else:
                 extracted_image_data.append(
-                    (cur_image[SUB_CAPTION_OR_IMAGE], caption, context))
+                    (cur_image[SUB_CAPTION_OR_IMAGE], caption, context)
+                )
 
         elif isinstance(caption, list):
-            if caption[MAIN_CAPTION_OR_IMAGE] != '':
+            if caption[MAIN_CAPTION_OR_IMAGE] != "":
                 extracted_image_data.append(
-                    (cur_image, caption[MAIN_CAPTION_OR_IMAGE], context))
+                    (cur_image, caption[MAIN_CAPTION_OR_IMAGE], context)
+                )
             if isinstance(caption[SUB_CAPTION_OR_IMAGE], list):
                 # multiple caps for one image:
                 long_caption = caption[MAIN_CAPTION_OR_IMAGE]
                 for subcap in caption[SUB_CAPTION_OR_IMAGE]:
-                    if long_caption != '':
-                        long_caption += ' : '
+                    if long_caption != "":
+                        long_caption += " : "
                     long_caption += subcap
                 extracted_image_data.append((cur_image, long_caption, context))
             else:
                 extracted_image_data.append(
-                    (cur_image, caption[SUB_CAPTION_OR_IMAGE]. context))
+                    (cur_image, caption[SUB_CAPTION_OR_IMAGE].context)
+                )
 
         else:
             extracted_image_data.append((cur_image, caption, context))
 
-    elif cur_image != '' and caption == '':
+    elif cur_image != "" and caption == "":
         # we may have missed the caption somewhere.
         REASONABLE_SEARCHBACK = 25
         REASONABLE_SEARCHFORWARD = 5
-        curly_no_tag_preceding = '(?<!\\w){'
+        curly_no_tag_preceding = "(?<!\\w){"
 
         for searchback in range(REASONABLE_SEARCHBACK):
             if line_index - searchback < 0:
@@ -685,27 +720,29 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
             m = re.search(curly_no_tag_preceding, back_line)
             if m:
                 open_curly = m.start()
-                open_curly, open_curly_line, close_curly, \
-                    close_curly_line = find_open_and_close_braces(
-                        line_index - searchback, open_curly, '{', lines)
+                open_curly, open_curly_line, close_curly, close_curly_line = (
+                    find_open_and_close_braces(
+                        line_index - searchback, open_curly, "{", lines
+                    )
+                )
 
                 cap_begin = open_curly + 1
 
-                caption = assemble_caption(open_curly_line, cap_begin,
-                                           close_curly_line, close_curly,
-                                           lines)
+                caption = assemble_caption(
+                    open_curly_line, cap_begin, close_curly_line, close_curly, lines
+                )
 
                 if isinstance(cur_image, list):
                     extracted_image_data.append(
-                        (cur_image[MAIN_CAPTION_OR_IMAGE], caption, context))
+                        (cur_image[MAIN_CAPTION_OR_IMAGE], caption, context)
+                    )
                     for sub_img in cur_image[SUB_CAPTION_OR_IMAGE]:
-                        extracted_image_data.append(
-                            (sub_img, caption, context))
+                        extracted_image_data.append((sub_img, caption, context))
                 else:
                     extracted_image_data.append((cur_image, caption, context))
                     break
 
-        if caption == '':
+        if caption == "":
             for searchforward in range(REASONABLE_SEARCHFORWARD):
                 if line_index + searchforward >= len(lines):
                     break
@@ -715,58 +752,55 @@ def put_it_together(cur_image, caption, context, extracted_image_data,
 
                 if m:
                     open_curly = m.start()
-                    open_curly, open_curly_line, close_curly, \
-                        close_curly_line = find_open_and_close_braces(
-                            line_index + searchforward, open_curly, '{', lines)
+                    open_curly, open_curly_line, close_curly, close_curly_line = (
+                        find_open_and_close_braces(
+                            line_index + searchforward, open_curly, "{", lines
+                        )
+                    )
 
                     cap_begin = open_curly + 1
 
-                    caption = assemble_caption(open_curly_line,
-                                               cap_begin, close_curly_line,
-                                               close_curly, lines)
+                    caption = assemble_caption(
+                        open_curly_line, cap_begin, close_curly_line, close_curly, lines
+                    )
 
                     if isinstance(cur_image, list):
                         extracted_image_data.append(
-                            (cur_image[MAIN_CAPTION_OR_IMAGE],
-                             caption, context))
+                            (cur_image[MAIN_CAPTION_OR_IMAGE], caption, context)
+                        )
                         for sub_img in cur_image[SUB_CAPTION_OR_IMAGE]:
-                            extracted_image_data.append(
-                                (sub_img, caption, context))
+                            extracted_image_data.append((sub_img, caption, context))
                     else:
-                        extracted_image_data.append(
-                            (cur_image, caption, context))
+                        extracted_image_data.append((cur_image, caption, context))
                     break
 
-        if caption == '':
+        if caption == "":
             if isinstance(cur_image, list):
                 extracted_image_data.append(
-                    (cur_image[MAIN_CAPTION_OR_IMAGE], 'No caption found',
-                     context))
+                    (cur_image[MAIN_CAPTION_OR_IMAGE], "No caption found", context)
+                )
                 for sub_img in cur_image[SUB_CAPTION_OR_IMAGE]:
-                    extracted_image_data.append(
-                        (sub_img, 'No caption', context))
+                    extracted_image_data.append((sub_img, "No caption", context))
             else:
-                extracted_image_data.append(
-                    (cur_image, 'No caption found', context))
+                extracted_image_data.append((cur_image, "No caption found", context))
 
-    elif caption != '' and cur_image == '':
+    elif caption != "" and cur_image == "":
         if isinstance(caption, list):
             long_caption = caption[MAIN_CAPTION_OR_IMAGE]
             for subcap in caption[SUB_CAPTION_OR_IMAGE]:
-                long_caption = long_caption + ': ' + subcap
+                long_caption = long_caption + ": " + subcap
         else:
             long_caption = caption
-        extracted_image_data.append(('', 'noimg' + long_caption, context))
+        extracted_image_data.append(("", "noimg" + long_caption, context))
 
     # if we're leaving the figure, no sense keeping the data
-    cur_image = ''
-    caption = ''
+    cur_image = ""
+    caption = ""
 
     return cur_image, caption, extracted_image_data
 
 
-def intelligently_find_filenames(line, TeX=False, ext=False,
-                                 commas_okay=False):
+def intelligently_find_filenames(line, TeX=False, ext=False, commas_okay=False):
     """Intelligently find filenames.
 
     Find the filename in the line.  We don't support all filenames!  Just eps
@@ -776,42 +810,40 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
 
     :return: filename ([string, ...]): what is probably the name of the file(s)
     """
-    files_included = ['ERROR']
+    files_included = ["ERROR"]
 
     if commas_okay:
-        valid_for_filename = '\\s*[A-Za-z0-9\\-\\=\\+/\\\\_\\.,%#]+'
+        valid_for_filename = "\\s*[A-Za-z0-9\\-\\=\\+/\\\\_\\.,%#]+"
     else:
-        valid_for_filename = '\\s*[A-Za-z0-9\\-\\=\\+/\\\\_\\.%#]+'
+        valid_for_filename = "\\s*[A-Za-z0-9\\-\\=\\+/\\\\_\\.%#]+"
 
     if ext:
-        valid_for_filename += r'\.e*ps[texfi2]*'
+        valid_for_filename += r"\.e*ps[texfi2]*"
 
     if TeX:
-        valid_for_filename += r'[\.latex]*'
+        valid_for_filename += r"[\.latex]*"
 
-    file_inclusion = re.findall('=' + valid_for_filename + '[ ,]', line)
+    file_inclusion = re.findall("=" + valid_for_filename + "[ ,]", line)
 
     if len(file_inclusion) > 0:
         # right now it looks like '=FILENAME,' or '=FILENAME '
         for file_included in file_inclusion:
             files_included.append(file_included[1:-1])
 
-    file_inclusion = re.findall('(?:[ps]*file=|figure=)' +
-                                valid_for_filename + '[,\\]} ]*', line)
+    file_inclusion = re.findall(
+        "(?:[ps]*file=|figure=)" + valid_for_filename + "[,\\]} ]*", line
+    )
 
     if len(file_inclusion) > 0:
         # still has the =
         for file_included in file_inclusion:
-            part_before_equals = file_included.split('=')[0]
+            part_before_equals = file_included.split("=")[0]
             if len(part_before_equals) != file_included:
-                file_included = file_included[
-                    len(part_before_equals) + 1:].strip()
+                file_included = file_included[len(part_before_equals) + 1 :].strip()
             if file_included not in files_included:
                 files_included.append(file_included)
 
-    file_inclusion = re.findall(
-        '["\'{\\[]' + valid_for_filename + '[}\\],"\']',
-        line)
+    file_inclusion = re.findall("[\"'{\\[]" + valid_for_filename + "[}\\],\"']", line)
 
     if len(file_inclusion) > 0:
         # right now it's got the {} or [] or "" or '' around it still
@@ -821,7 +853,7 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
             if file_included not in files_included:
                 files_included.append(file_included)
 
-    file_inclusion = re.findall('^' + valid_for_filename + '$', line)
+    file_inclusion = re.findall("^" + valid_for_filename + "$", line)
 
     if len(file_inclusion) > 0:
         for file_included in file_inclusion:
@@ -829,7 +861,7 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
             if file_included not in files_included:
                 files_included.append(file_included)
 
-    file_inclusion = re.findall('^' + valid_for_filename + '[,\\} $]', line)
+    file_inclusion = re.findall("^" + valid_for_filename + "[,\\} $]", line)
 
     if len(file_inclusion) > 0:
         for file_included in file_inclusion:
@@ -837,7 +869,7 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
             if file_included not in files_included:
                 files_included.append(file_included)
 
-    file_inclusion = re.findall('\\s*' + valid_for_filename + '\\s*$', line)
+    file_inclusion = re.findall("\\s*" + valid_for_filename + "\\s*$", line)
 
     if len(file_inclusion) > 0:
         for file_included in file_inclusion:
@@ -845,18 +877,18 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
             if file_included not in files_included:
                 files_included.append(file_included)
 
-    if files_included != ['ERROR']:
+    if files_included != ["ERROR"]:
         files_included = files_included[1:]  # cut off the dummy
 
     for file_included in files_included:
-        if file_included == '':
+        if file_included == "":
             files_included.remove(file_included)
-        if ' ' in file_included:
-            for subfile in file_included.split(' '):
+        if " " in file_included:
+            for subfile in file_included.split(" "):
                 if subfile not in files_included:
                     files_included.append(subfile)
-        if ',' in file_included:
-            for subfile in file_included.split(' '):
+        if "," in file_included:
+            for subfile in file_included.split(" "):
                 if subfile not in files_included:
                     files_included.append(subfile)
 
@@ -866,11 +898,11 @@ def intelligently_find_filenames(line, TeX=False, ext=False,
 def get_lines_from_file(filepath, encoding="UTF-8"):
     """Return an iterator over lines."""
     try:
-        fd = codecs.open(filepath, 'r', encoding)
+        fd = codecs.open(filepath, "r", encoding)
         lines = fd.readlines()
     except UnicodeDecodeError:
         # Fall back to 'ISO-8859-1'
-        fd = codecs.open(filepath, 'r', 'ISO-8859-1')
+        fd = codecs.open(filepath, "r", "ISO-8859-1")
         lines = fd.readlines()
     finally:
         fd.close()

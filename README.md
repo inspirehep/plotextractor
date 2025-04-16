@@ -58,6 +58,3 @@ Run tests
 ```
 pytest .
 ```
-
-
-

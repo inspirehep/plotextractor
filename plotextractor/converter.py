@@ -24,7 +24,6 @@
 
 """Functions related to conversion and untarring."""
 
-
 import os
 import tarfile
 import re
@@ -69,9 +68,9 @@ def untar(original_tarball, output_directory):
     file_list = []
 
     for extracted_file in tarball.getnames():
-        if extracted_file == '':
+        if extracted_file == "":
             break
-        if extracted_file.startswith('./'):
+        if extracted_file.startswith("./"):
             extracted_file = extracted_file[2:]
         # ensure we are actually looking at the right file
         extracted_file = os.path.join(output_directory, extracted_file)
@@ -83,9 +82,8 @@ def untar(original_tarball, output_directory):
 
 
 def detect_images_and_tex(
-        file_list,
-        allowed_image_types=('eps', 'png', 'ps', 'jpg', 'pdf'),
-        timeout=20):
+    file_list, allowed_image_types=("eps", "png", "ps", "jpg", "pdf"), timeout=20
+):
     """Detect from a list of files which are TeX or images.
 
     :param: file_list (list): list of absolute file paths
@@ -96,27 +94,26 @@ def detect_images_and_tex(
         list of images in the tarball and the name of the TeX file in the
         tarball.
     """
-    tex_file_extension = 'tex'
+    tex_file_extension = "tex"
 
     image_list = []
     might_be_tex = []
 
     for extracted_file in file_list:
         # Ignore directories and hidden (metadata) files
-        if (re.search(r'[\uD800-\uDFFF]', extracted_file)
-                and sys.version_info[0] == 3):
+        if re.search(r"[\uD800-\uDFFF]", extracted_file) and sys.version_info[0] == 3:
             # Illegal file path/name
             continue
-        if os.path.isdir(extracted_file) \
-           or os.path.basename(extracted_file).startswith('.'):
+        if os.path.isdir(extracted_file) or os.path.basename(extracted_file).startswith(
+            "."
+        ):
             continue
 
         magic_str = magic.from_file(extracted_file, mime=True)
 
         if magic_str == "application/x-tex":
             might_be_tex.append(extracted_file)
-        elif magic_str.startswith('image/') \
-                or magic_str == "application/postscript":
+        elif magic_str.startswith("image/") or magic_str == "application/postscript":
             image_list.append(extracted_file)
 
         # If neither, maybe it is TeX or an image anyway, otherwise,
@@ -148,7 +145,7 @@ def convert_images(image_list, image_format="png", timeout=20):
     :return: image_mapping ({new_image: original_image, ...]): The mapping of
         image files when all have been converted to PNG format.
     """
-    png_output_contains = b'PNG image'
+    png_output_contains = b"PNG image"
     image_mapping = {}
     for image_file in image_list:
         if os.path.isdir(image_file):
@@ -157,7 +154,7 @@ def convert_images(image_list, image_format="png", timeout=20):
         if not os.path.exists(image_file):
             continue
 
-        cmd_out = check_output(['file', image_file], timeout=timeout)
+        cmd_out = check_output(["file", image_file], timeout=timeout)
         if cmd_out.find(png_output_contains) > -1:
             # Already PNG
             image_mapping[image_file] = image_file
@@ -180,17 +177,17 @@ def convert_images(image_list, image_format="png", timeout=20):
 
 def convert_image(from_file, to_file, image_format):
     """Convert an image to given format."""
-    memory_limit = limits['memory']
-    disk_limit = limits['disk']
+    memory_limit = limits["memory"]
+    disk_limit = limits["disk"]
     # fix for weird situation which SOMETIMES
     # (usualy on first file in  a record)
     # limits resets to default value when used inside `with` block in here.
     with Image(filename=from_file) as original:
-        limits['memory'] = memory_limit
-        limits['disk'] = disk_limit
+        limits["memory"] = memory_limit
+        limits["disk"] = disk_limit
         with original.convert(image_format) as converted:
-            limits['memory'] = memory_limit
-            limits['disk'] = disk_limit
+            limits["memory"] = memory_limit
+            limits["disk"] = disk_limit
             converted.save(filename=to_file)
     return to_file
 
@@ -209,15 +206,14 @@ def rotate_image(filename, line, sdir, image_list):
     :return: True if something was rotated
     """
     file_loc = get_image_location(filename, sdir, image_list)
-    degrees = re.findall(r'(\bangle=-?[\d]+|\brotate=-?[\d]+)', line)
+    degrees = re.findall(r"(\bangle=-?[\d]+|\brotate=-?[\d]+)", line)
 
     if len(degrees) < 1:
         return False
 
-    degrees = degrees[0].split('=')[-1].strip()
+    degrees = degrees[0].split("=")[-1].strip()
 
-    if file_loc is None or file_loc == 'ERROR' or\
-            not re.match('-*\\d+', degrees):
+    if file_loc is None or file_loc == "ERROR" or not re.match("-*\\d+", degrees):
         return False
 
     if degrees:
