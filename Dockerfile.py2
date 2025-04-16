@@ -7,6 +7,8 @@ COPY . .
 
 RUN apt-get update -y && apt-get install -y ghostscript
 
-RUN pip install -e .[tests]
+RUN pip install --no-cache-dir poetry
+RUN rm poetry.lock
+RUN poetry config virtualenvs.create false && poetry lock && poetry install --no-root
 
 CMD ["/bin/bash"]

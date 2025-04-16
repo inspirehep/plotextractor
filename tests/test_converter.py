@@ -25,7 +25,6 @@
 
 import magic
 import os
-import pkg_resources
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -33,8 +32,7 @@ from plotextractor.converter import detect_images_and_tex, untar
 
 
 def test_detect_images_and_tex_ignores_hidden_metadata_files():
-    tarball_filename = pkg_resources.resource_filename(
-        __name__, os.path.join('data', '1704.02281.tar.gz'))
+    tarball_filename = os.path.join('tests', 'data', '1704.02281.tar.gz')
     try:
         temporary_dir = mkdtemp()
         file_list = untar(tarball_filename, temporary_dir)
