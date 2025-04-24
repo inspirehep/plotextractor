@@ -24,61 +24,51 @@
 
 """Small library for extracting plots used in scholarly communication."""
 
-import sys
-
 from setuptools import setup
 
-readme = open('README.md').read()
+readme = open("README.md").read()
 
 requirements = [
-    'Wand>=0.4.1,<=0.5.9',
-    'subprocess32>=3.2.6',
-    'python-magic',
-    'six>=1.7.2',
+    "Wand>=0.4.1,<=0.5.9",
+    "subprocess32>=3.2.6",
+    "python-magic",
+    "six>=1.7.2",
 ]
 
-test_requirements = [
-    'coverage>=4.0.0',
-    'pytest>=2.8.0',
-    'pytest-cov>=2.1.0',
-    'pycodestyle>=2.8.0',
-]
+test_requirements = ["coverage>=4.0.0", "pytest>=2.8.0", "pytest-cov>=2.1.0"]
 
 # Get the version string. Cannot be done with import!
 setup(
-    name='plotextractor',
+    name="plotextractor",
     description=__doc__,
     long_description="A small library for extracting plots used in scholarly communication.",
-    keywords='plots figures extraction TeX LaTeX',
-    license='GPLv2',
-    author='CERN',
-    author_email='admin@inspirehep.net',
-    url='https://github.com/inspirehep/plotextractor',
+    keywords="plots figures extraction TeX LaTeX",
+    license="GPLv2",
+    author="CERN",
+    author_email="admin@inspirehep.net",
+    url="https://github.com/inspirehep/plotextractor",
     packages=[
-        'plotextractor',
+        "plotextractor",
     ],
     zip_safe=False,
     include_package_data=True,
-    platforms='any',
+    platforms="any",
     install_requires=requirements,
-    extras_require={
-        'tests': test_requirements
-    },
+    extras_require={"tests": test_requirements},
     classifiers=[
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
-        'Operating System :: OS Independent',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+        "Operating System :: OS Independent",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     tests_require=test_requirements,
     version="1.0.13",

@@ -26,10 +26,8 @@
 
 
 class InvalidTarball(Exception):
-
     """Raised when the file to extract is not a valid tarball."""
 
 
 class NoTexFilesFound(Exception):
-
     """Raised when the extracted has no TeX files."""

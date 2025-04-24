@@ -26,7 +26,6 @@
 import os
 import re
 import sys
-import six
 
 from collections import OrderedDict
 
@@ -50,15 +49,15 @@ def find_open_and_close_braces(line_index, start, brace, lines):
         we started on)
     """
 
-    if brace in ['[', ']']:
-        open_brace = '['
-        close_brace = ']'
-    elif brace in ['{', '}']:
-        open_brace = '{'
-        close_brace = '}'
-    elif brace in ['(', ')']:
-        open_brace = '('
-        close_brace = ')'
+    if brace in ["[", "]"]:
+        open_brace = "["
+        close_brace = "]"
+    elif brace in ["{", "}"]:
+        open_brace = "{"
+        close_brace = "}"
+    elif brace in ["(", ")"]:
+        open_brace = "("
+        close_brace = ")"
     else:
         # unacceptable brace type!
         return (-1, -1, -1, -1)
@@ -92,8 +91,7 @@ def find_open_and_close_braces(line_index, start, brace, lines):
 
             if line_index >= len(lines):
                 # hanging braces!
-                return (ret_open_index, ret_open_line,
-                        ret_open_index, ret_open_line)
+                return (ret_open_index, ret_open_line, ret_open_index, ret_open_line)
 
             line = lines[line_index]
             # to not skip things that are at the beginning of the line
@@ -108,8 +106,7 @@ def find_open_and_close_braces(line_index, start, brace, lines):
 
         if close_index != -1:
             open_braces.pop()
-            if len(open_braces) == 0 and \
-                    (open_index > close_index or open_index == -1):
+            if len(open_braces) == 0 and (open_index > close_index or open_index == -1):
                 break
         if open_index != -1:
             open_braces.append(open_brace)
@@ -137,7 +134,7 @@ def assemble_caption(begin_line, begin_index, end_line, end_index, lines):
     """
 
     # stuff we don't like
-    label_head = '\\label{'
+    label_head = "\\label{"
 
     # reassemble that sucker
     if end_line > begin_line:
@@ -145,11 +142,11 @@ def assemble_caption(begin_line, begin_index, end_line, end_index, lines):
         caption = lines[begin_line][begin_index:]
 
         for included_line_index in range(begin_line + 1, end_line):
-            caption = caption + ' ' + lines[included_line_index]
+            caption = caption + " " + lines[included_line_index]
 
-        caption = caption + ' ' + lines[end_line][:end_index]
-        caption = caption.replace('\n', ' ')
-        caption = caption.replace('  ', ' ')
+        caption = caption + " " + lines[end_line][:end_index]
+        caption = caption.replace("\n", " ")
+        caption = caption.replace("  ", " ")
     else:
         # it fit on one line
         caption = lines[begin_line][begin_index:end_index]
@@ -159,20 +156,20 @@ def assemble_caption(begin_line, begin_index, end_line, end_index, lines):
     if label_begin > -1:
         # we know that our caption is only one line, so if there's a label
         # tag in it, it will be all on one line.  so we make up some args
-        dummy_start, dummy_start_line, label_end, dummy_end = \
-                find_open_and_close_braces(0, label_begin, '{', [caption])
-        caption = caption[:label_begin] + caption[label_end + 1:]
+        dummy_start, dummy_start_line, label_end, dummy_end = (
+            find_open_and_close_braces(0, label_begin, "{", [caption])
+        )
+        caption = caption[:label_begin] + caption[label_end + 1 :]
 
     caption = caption.strip()
 
-    if len(caption) > 1 and caption[0] == '{' and caption[-1] == '}':
+    if len(caption) > 1 and caption[0] == "{" and caption[-1] == "}":
         caption = caption[1:-1]
 
     return caption
 
 
-def prepare_image_data(extracted_image_data, output_directory,
-                       image_mapping):
+def prepare_image_data(extracted_image_data, output_directory, image_mapping):
     """Prepare and clean image-data from duplicates and other garbage.
 
     :param: extracted_image_data ([(string, string, list, list) ...],
@@ -187,29 +184,30 @@ def prepare_image_data(extracted_image_data, output_directory,
     """
     img_list = OrderedDict()
     for image, caption, label in extracted_image_data:
-        if not image or image == 'ERROR':
+        if not image or image == "ERROR":
             continue
         image_location = get_image_location(
-            image,
-            output_directory,
-            image_mapping.keys()
+            image, output_directory, image_mapping.keys()
         )
 
-        if not image_location or not os.path.exists(image_location) or \
-                len(image_location) < 3:
+        if (
+            not image_location
+            or not os.path.exists(image_location)
+            or len(image_location) < 3
+        ):
             continue
 
         image_location = os.path.normpath(image_location)
         if image_location in img_list:
-            if caption not in img_list[image_location]['captions']:
-                img_list[image_location]['captions'].append(caption)
+            if caption not in img_list[image_location]["captions"]:
+                img_list[image_location]["captions"].append(caption)
         else:
             img_list[image_location] = dict(
                 url=image_location,
                 original_url=image_mapping[image_location],
                 captions=[caption],
                 label=label,
-                name=get_name_from_path(image_location, output_directory)
+                name=get_name_from_path(image_location, output_directory),
             )
     return img_list.values()
 
@@ -228,28 +226,28 @@ def get_image_location(image, sdir, image_list, recurred=False):
     if isinstance(image, list):
         # image is a list, not good
         return None
-    image = image.decode('utf-8') if sys.version_info[0] == 2 else str(image)
+    image = image.decode("utf-8") if sys.version_info[0] == 2 else str(image)
     image = image.strip()
 
-    figure_or_file = '(figure=|file=)'
+    figure_or_file = "(figure=|file=)"
     figure_or_file_in_image = re.findall(figure_or_file, image)
     if len(figure_or_file_in_image) > 0:
-        image = image.replace(figure_or_file_in_image[0], '')
+        image = image.replace(figure_or_file_in_image[0], "")
 
-    includegraphics = r'\\includegraphics{(.+)}'
+    includegraphics = r"\\includegraphics{(.+)}"
     includegraphics_in_image = re.findall(includegraphics, image)
     if len(includegraphics_in_image) > 0:
         image = includegraphics_in_image[0]
 
     image = image.strip()
 
-    some_kind_of_tag = '\\\\\\w+ '
+    some_kind_of_tag = "\\\\\\w+ "
 
-    if image.startswith('./'):
+    if image.startswith("./"):
         image = image[2:]
     if re.match(some_kind_of_tag, image):
-        image = image[len(image.split(' ')[0]) + 1:]
-    if image.startswith('='):
+        image = image[len(image.split(" ")[0]) + 1 :]
+    if image.startswith("="):
         image = image[1:]
 
     if len(image) == 1:
@@ -267,7 +265,7 @@ def get_image_location(image, sdir, image_list, recurred=False):
             return png_image
 
     # maybe it's in a subfolder (TeX just understands that)
-    for prefix in ['eps', 'fig', 'figs', 'figures', 'figs', 'images']:
+    for prefix in ["eps", "fig", "figs", "figures", "figs", "images"]:
         if os.path.isdir(os.path.join(sdir, prefix)):
             image_list = os.listdir(os.path.join(sdir, prefix))
             for png_image in image_list:
@@ -299,17 +297,17 @@ def get_image_location(image, sdir, image_list, recurred=False):
         return None
 
     # agh, this calls for drastic measures
-    for piece in image.split(' '):
+    for piece in image.split(" "):
         res = get_image_location(piece, sdir, image_list, recurred=True)
         if res is not None:
             return res
 
-    for piece in image.split(','):
+    for piece in image.split(","):
         res = get_image_location(piece, sdir, image_list, recurred=True)
         if res is not None:
             return res
 
-    for piece in image.split('='):
+    for piece in image.split("="):
         res = get_image_location(piece, sdir, image_list, recurred=True)
         if res is not None:
             return res
@@ -326,9 +324,9 @@ def get_converted_image_name(image):
 
     :return: converted_image (string): the fullpath of the image after convert
     """
-    png_extension = '.png'
+    png_extension = ".png"
 
-    if image[(0 - len(png_extension)):] == png_extension:
+    if image[(0 - len(png_extension)) :] == png_extension:
         # it already ends in png!  we're golden
         return image
 
@@ -336,9 +334,9 @@ def get_converted_image_name(image):
     image = os.path.split(image)[-1]
 
     # cut off the old extension
-    if len(image.split('.')) > 1:
-        old_extension = '.' + image.split('.')[-1]
-        converted_image = image[:(0 - len(old_extension))] + png_extension
+    if len(image.split(".")) > 1:
+        old_extension = "." + image.split(".")[-1]
+        converted_image = image[: (0 - len(old_extension))] + png_extension
     else:
         # no extension... damn
         converted_image = image + png_extension
@@ -365,14 +363,14 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
 
     current_dir = os.path.split(current_tex_name)[0]
 
-    some_kind_of_tag = '\\\\\\w+ '
+    some_kind_of_tag = "\\\\\\w+ "
 
     new_tex_name = new_tex_name.strip()
-    if new_tex_name.startswith('input'):
-        new_tex_name = new_tex_name[len('input'):]
+    if new_tex_name.startswith("input"):
+        new_tex_name = new_tex_name[len("input") :]
     if re.match(some_kind_of_tag, new_tex_name):
-        new_tex_name = new_tex_name[len(new_tex_name.split(' ')[0]) + 1:]
-    if new_tex_name.startswith('./'):
+        new_tex_name = new_tex_name[len(new_tex_name.split(" ")[0]) + 1 :]
+    if new_tex_name.startswith("./"):
         new_tex_name = new_tex_name[2:]
     if len(new_tex_name) == 0:
         return None
@@ -381,7 +379,7 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
     new_tex_file = os.path.split(new_tex_name)[-1]
     new_tex_folder = os.path.split(new_tex_name)[0]
     if new_tex_folder == new_tex_file:
-        new_tex_folder = ''
+        new_tex_folder = ""
 
     # could be in the current directory
     for any_file in os.listdir(current_dir):
@@ -392,8 +390,9 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
     if os.path.isdir(os.path.join(current_dir, new_tex_folder)):
         for any_file in os.listdir(os.path.join(current_dir, new_tex_folder)):
             if any_file == new_tex_file:
-                return os.path.join(os.path.join(current_dir, new_tex_folder),
-                                    new_tex_file)
+                return os.path.join(
+                    os.path.join(current_dir, new_tex_folder), new_tex_file
+                )
 
     # could be in a subfolder of a higher directory
     one_dir_up = os.path.join(os.path.split(current_dir)[0], new_tex_folder)
@@ -402,16 +401,16 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
             if any_file == new_tex_file:
                 return os.path.join(one_dir_up, new_tex_file)
 
-    two_dirs_up = os.path.join(os.path.split(os.path.split(current_dir)[0])[0],
-                               new_tex_folder)
+    two_dirs_up = os.path.join(
+        os.path.split(os.path.split(current_dir)[0])[0], new_tex_folder
+    )
     if os.path.isdir(two_dirs_up):
         for any_file in os.listdir(two_dirs_up):
             if any_file == new_tex_file:
                 return os.path.join(two_dirs_up, new_tex_file)
 
     if tex_location is None and not recurred:
-        return get_tex_location(new_tex_name + '.tex', current_tex_name,
-                                recurred=True)
+        return get_tex_location(new_tex_name + ".tex", current_tex_name, recurred=True)
 
     return tex_location
 
@@ -419,5 +418,9 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
 def get_name_from_path(full_path, root_path):
     """Create a filename by merging path after root directory."""
     relative_image_path = os.path.relpath(full_path, root_path)
-    return "_".join(relative_image_path.split('.')[:-1]).replace('/', '_')\
-        .replace(';', '').replace(':', '')
+    return (
+        "_".join(relative_image_path.split(".")[:-1])
+        .replace("/", "_")
+        .replace(";", "")
+        .replace(":", "")
+    )

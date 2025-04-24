@@ -26,12 +26,11 @@
 
 """Plotextractor configuration."""
 
-
 # CFG_PLOTEXTRACTOR_DESY_BASE --
-CFG_PLOTEXTRACTOR_DESY_BASE = 'http://www-library.desy.de/preparch/desy/'
+CFG_PLOTEXTRACTOR_DESY_BASE = "http://www-library.desy.de/preparch/desy/"
 
 # CFG_PLOTEXTRACTOR_DESY_PIECE --
-CFG_PLOTEXTRACTOR_DESY_PIECE = '/desy'
+CFG_PLOTEXTRACTOR_DESY_PIECE = "/desy"
 
 CFG_PLOTEXTRACTOR_CONTEXT_WORD_LIMIT = 75
 
@@ -40,6 +39,10 @@ CFG_PLOTEXTRACTOR_CONTEXT_SENTENCE_LIMIT = 2
 CFG_PLOTEXTRACTOR_CONTEXT_EXTRACT_LIMIT = 750
 
 CFG_PLOTEXTRACTOR_DISALLOWED_TEX = [
-    'begin', 'end', 'section', 'includegraphics', 'caption',
-    'acknowledgements',
+    "begin",
+    "end",
+    "section",
+    "includegraphics",
+    "caption",
+    "acknowledgements",
 ]
