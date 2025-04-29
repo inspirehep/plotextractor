@@ -222,6 +222,8 @@ def test_process_tarball_with_wrong_utf_path_inside(tarball_with_wrong_utf):
 def test_process_api_with_include(tarball_test_for_include):
     """Test simple API for including the plots for \include tag."""
     plots = plotextractor.process_tarball(tarball_test_for_include, context=True)
+    import pdb; pdb.set_trace()
+    
     assert len(plots) == 155
     assert "contexts" in plots[0]
     assert "label" in plots[0]

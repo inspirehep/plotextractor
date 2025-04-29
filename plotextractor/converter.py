@@ -24,6 +24,7 @@
 
 """Functions related to conversion and untarring."""
 
+import magic
 import os
 import tarfile
 import re
@@ -55,14 +56,14 @@ def untar(original_tarball, output_directory):
     if not tarfile.is_tarfile(original_tarball):
         raise InvalidTarball
 
-    with tarfile.open(original_tarball) as tarball:
-        # set mtimes of members to now
-        epochsecs = int(time())
-        for member in tarball.getmembers():
-            member.mtime = epochsecs
-        tarball.extractall(output_directory)
+    tarball = tarfile.open(original_tarball)
+    # set mtimes of members to now
+    epochsecs = int(time())
+    for member in tarball.getmembers():
+        member.mtime = epochsecs
+    tarball.extractall(output_directory)
 
-        file_list = []
+    file_list = []
 
     for extracted_file in tarball.getnames():
         if extracted_file == "":
@@ -75,7 +76,7 @@ def untar(original_tarball, output_directory):
         # Add to full list of extracted files
         file_list.append(extracted_file)
 
-        return file_list
+    return file_list
 
 
 def detect_images_and_tex(
