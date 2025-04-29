@@ -29,11 +29,11 @@ from setuptools import setup
 readme = open("README.md").read()
 
 requirements = [
-    'Wand>=0.4.1,<=0.5.9',
-    'subprocess32>=3.2.6',
-    'python-magic',
-    'six>=1.7.2',
-    'pillow>=6.2.2'
+    "subprocess32>=3.2.6",
+    "python-magic",
+    "six>=1.7.2",
+    "pillow>=6.2.2",
+    "pdf2image==1.7.1",
 ]
 
 test_requirements = ["coverage>=4.0.0", "pytest>=2.8.0", "pytest-cov>=2.1.0"]

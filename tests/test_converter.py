@@ -29,7 +29,7 @@ import pkg_resources
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from plotextractor.converter import detect_images_and_tex, untar
+from plotextractor.converter import detect_images_and_tex, untar, convert_images
 
 
 def test_detect_images_and_tex_ignores_hidden_metadata_files():
@@ -49,3 +49,15 @@ def test_detect_images_and_tex_ignores_hidden_metadata_files():
             )
     finally:
         rmtree(temporary_dir)
+
+def test_skip_decompression_bomb_error():
+    pdf = pkg_resources.resource_filename(
+        __name__, os.path.join("data", "eada5d4d-efb3-4e89-9049-84c3e0849922.pdf")
+    )
+    assert len(convert_images([pdf])) == 0
+
+def test_conversion_eps():
+    eps = pkg_resources.resource_filename(
+        __name__, os.path.join("data", "circle.eps")
+    )
+    assert len(convert_images([eps])) == 1

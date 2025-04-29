@@ -24,20 +24,26 @@
 
 """Functions related to conversion and untarring."""
 
-import magic
 import os
 import tarfile
 import re
 import sys
 from time import time
+from pdf2image import convert_from_path
 
 if sys.version_info[0] == 2:
     from subprocess32 import check_output
 else:
     from subprocess import check_output
 
+import magic
 from PIL import Image
 
+from pdf2image.exceptions import (
+    PDFInfoNotInstalledError,
+    PDFPageCountError,
+    PDFSyntaxError,
+)
 from .errors import InvalidTarball
 from .output_utils import get_converted_image_name, get_image_location
 
@@ -164,7 +170,15 @@ def convert_images(image_list, image_format="png", timeout=20):
             converted_image_file = get_converted_image_name(image_file)
             try:
                 convert_image(image_file, converted_image_file, image_format)
-            except (KeyError, IOError):
+
+            except (
+                KeyError,
+                IOError,
+                Image.DecompressionBombError,
+                PDFInfoNotInstalledError,
+                PDFPageCountError,
+                PDFSyntaxError,
+            ):
                 # Too bad, cannot convert image format.
                 continue
             if os.path.exists(converted_image_file):
@@ -175,8 +189,16 @@ def convert_images(image_list, image_format="png", timeout=20):
 
 def convert_image(from_file, to_file, image_format):
     """Convert an image to given format."""
-    with Image.open(from_file) as original:
-        original.save(to_file, image_format)
+    if magic.from_file(from_file, mime=True) == "application/pdf":
+        convert_from_path(
+            from_file,
+            output_folder=os.path.dirname(to_file),
+            fmt=image_format,
+            single_file=True,
+            output_file=os.path.splitext(os.path.basename(to_file))[0],
+        )
+    else:
+        Image.open(from_file).save(to_file, image_format)
     return to_file
 
 
@@ -216,5 +238,5 @@ def rotate_image(filename, line, sdir, image_list):
         with Image.open(file_loc) as image:
             rotated = image.rotate(degrees)
             rotated.save(file_loc)
-            return True
+        return True
     return False

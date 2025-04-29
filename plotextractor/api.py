@@ -67,7 +67,6 @@ def process_tarball(tarball, output_directory=None, context=False):
         output_directory = os.path.abspath("{0}_files".format(tarball))
 
     extracted_files_list = untar(tarball, output_directory)
-    import pdb; pdb.set_trace()
     image_list, tex_files = detect_images_and_tex(extracted_files_list)
 
     if tex_files == [] or tex_files is None:
