@@ -29,6 +29,7 @@ import tarfile
 import re
 import sys
 from time import time
+from pdf2image import convert_from_path
 
 if sys.version_info[0] == 2:
     from subprocess32 import check_output
@@ -36,10 +37,13 @@ else:
     from subprocess import check_output
 
 import magic
-from wand.exceptions import MissingDelegateError, ResourceLimitError
-from wand.image import Image
-from wand.resource import limits
+from PIL import Image
 
+from pdf2image.exceptions import (
+    PDFInfoNotInstalledError,
+    PDFPageCountError,
+    PDFSyntaxError,
+)
 from .errors import InvalidTarball
 from .output_utils import get_converted_image_name, get_image_location
 
@@ -159,14 +163,22 @@ def convert_images(image_list, image_format="png", timeout=20):
             # Already PNG
             image_mapping[image_file] = image_file
         else:
-            # we're just going to assume that ImageMagick can convert all
+            # we're just going to assume that Pillow can convert all
             # the image types that we may be faced with
             # for sure it can do EPS->PNG and JPG->PNG and PS->PNG
             # and PSTEX->PNG
             converted_image_file = get_converted_image_name(image_file)
             try:
                 convert_image(image_file, converted_image_file, image_format)
-            except (MissingDelegateError, ResourceLimitError):
+
+            except (
+                KeyError,
+                IOError,
+                Image.DecompressionBombError,
+                PDFInfoNotInstalledError,
+                PDFPageCountError,
+                PDFSyntaxError,
+            ):
                 # Too bad, cannot convert image format.
                 continue
             if os.path.exists(converted_image_file):
@@ -177,18 +189,16 @@ def convert_images(image_list, image_format="png", timeout=20):
 
 def convert_image(from_file, to_file, image_format):
     """Convert an image to given format."""
-    memory_limit = limits["memory"]
-    disk_limit = limits["disk"]
-    # fix for weird situation which SOMETIMES
-    # (usualy on first file in  a record)
-    # limits resets to default value when used inside `with` block in here.
-    with Image(filename=from_file) as original:
-        limits["memory"] = memory_limit
-        limits["disk"] = disk_limit
-        with original.convert(image_format) as converted:
-            limits["memory"] = memory_limit
-            limits["disk"] = disk_limit
-            converted.save(filename=to_file)
+    if magic.from_file(from_file, mime=True) == "application/pdf":
+        convert_from_path(
+            from_file,
+            output_folder=os.path.dirname(to_file),
+            fmt=image_format,
+            single_file=True,
+            output_file=os.path.splitext(os.path.basename(to_file))[0],
+        )
+    else:
+        Image.open(from_file).save(to_file, image_format)
     return to_file
 
 
@@ -225,10 +235,8 @@ def rotate_image(filename, line, sdir, image_list):
         if not os.path.exists(file_loc):
             return False
 
-        degrees = -degrees  # ImageMagick and graphicx use opposite conventions
-        with Image(filename=file_loc) as image:
-            with image.clone() as rotated:
-                rotated.rotate(degrees)
-                rotated.save(filename=file_loc)
+        with Image.open(file_loc) as image:
+            rotated = image.rotate(degrees)
+            rotated.save(file_loc)
         return True
     return False

@@ -5,7 +5,7 @@ WORKDIR ${APP_HOME}
 
 COPY . .
 
-RUN apt-get update -y && apt-get install -y ghostscript
+RUN apt-get update -y && apt-get install -y ghostscript poppler-utils
 
 RUN sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
 
