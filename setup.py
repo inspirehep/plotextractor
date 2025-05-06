@@ -72,5 +72,5 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     tests_require=test_requirements,
-    version="1.0.15",
+    version="1.0.16",
 )
