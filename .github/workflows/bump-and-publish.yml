@@ -6,6 +6,8 @@ on:
 jobs:
   bump:
     runs-on: ubuntu-latest
+    outputs:
+      new_sha: ${{ steps.sha.outputs.SHA }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -38,6 +40,13 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
           tags: true
+      
+      - name: get sha
+        id: sha
+        run: |
+          sha_new=$(git rev-parse HEAD)
+          echo $sha_new
+          echo "SHA=$sha_new" >> $GITHUB_OUTPUT
 
 
   publish:
@@ -48,7 +57,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
+          ref: ${{ needs.bump.outputs.new_sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
