@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-
+import pytest
 import magic
 import os
 import pkg_resources
@@ -50,14 +50,45 @@ def test_detect_images_and_tex_ignores_hidden_metadata_files():
     finally:
         rmtree(temporary_dir)
 
+@pytest.mark.xfail(reason="By reducing the dpi to 100, we are able to extract the image")
 def test_skip_decompression_bomb_error():
     pdf = pkg_resources.resource_filename(
         __name__, os.path.join("data", "eada5d4d-efb3-4e89-9049-84c3e0849922.pdf")
     )
     assert len(convert_images([pdf])) == 0
 
+def test_conversion_pdf():
+    pdf = pkg_resources.resource_filename(
+        __name__, os.path.join("data", "eada5d4d-efb3-4e89-9049-84c3e0849922.pdf")
+    )
+    assert len(convert_images([pdf])) == 1
+
 def test_conversion_eps():
     eps = pkg_resources.resource_filename(
         __name__, os.path.join("data", "circle.eps")
     )
     assert len(convert_images([eps])) == 1
+
+
+def test_compress_big_png():
+    png = pkg_resources.resource_filename(
+        __name__, os.path.join("data", "big_image.png")
+    )
+
+    assert len(convert_images([png])) == 1
+
+
+def test_compress_big_jpg():
+    jpg = pkg_resources.resource_filename(
+        __name__, os.path.join("data", "random_image.jpg")
+    )
+
+    assert len(convert_images([jpg])) == 1
+
+
+def test_compress_skips_corrupted_png():
+    corrupted = pkg_resources.resource_filename(
+        __name__, os.path.join("data", "corrupted_large.png")
+    )
+
+    assert len(convert_images([corrupted])) == 0

@@ -47,6 +47,26 @@ from pdf2image.exceptions import (
 from .errors import InvalidTarball
 from .output_utils import get_converted_image_name, get_image_location
 
+MAX_BYTES = 5 * 1024 * 1024  # 5 MB cap
+
+def compress_png(path, image_format):
+    """
+    Runs compress_png on the given file.
+    If it is larger than 5MB, it will be compressed to a PNG
+    with a palette of 256 colors.
+    This approximation based on tests, converts a 15mb png to a 4.5mb png
+    Returns the path on success, or None if compression failed.
+    """
+    size = os.path.getsize(path)
+
+    if size > MAX_BYTES:
+        try:
+            img = Image.open(path)
+            pal = img.convert("P", palette=Image.ADAPTIVE, colors=256)
+            pal.save(path, format=image_format, optimize=True)
+        except Exception as e:
+            return None
+    return path
 
 def untar(original_tarball, output_directory):
     """Untar given tarball file into directory.
@@ -160,8 +180,13 @@ def convert_images(image_list, image_format="png", timeout=20):
 
         cmd_out = check_output(["file", image_file], timeout=timeout)
         if cmd_out.find(png_output_contains) > -1:
-            # Already PNG
-            image_mapping[image_file] = image_file
+            # Already PNG - Compress if needed
+            image_file_path = compress_png(image_file, image_format)
+            if image_file_path:
+                image_mapping[image_file] = image_file
+            else:
+                # Skip if compression failed
+                continue
         else:
             # we're just going to assume that Pillow can convert all
             # the image types that we may be faced with
@@ -169,8 +194,7 @@ def convert_images(image_list, image_format="png", timeout=20):
             # and PSTEX->PNG
             converted_image_file = get_converted_image_name(image_file)
             try:
-                convert_image(image_file, converted_image_file, image_format)
-
+                out_file = convert_image(image_file, converted_image_file, image_format)
             except (
                 KeyError,
                 IOError,
@@ -181,8 +205,8 @@ def convert_images(image_list, image_format="png", timeout=20):
             ):
                 # Too bad, cannot convert image format.
                 continue
-            if os.path.exists(converted_image_file):
-                image_mapping[converted_image_file] = image_file
+            if out_file and os.path.exists(out_file):
+                image_mapping[out_file] = image_file
 
     return image_mapping
 
@@ -192,14 +216,16 @@ def convert_image(from_file, to_file, image_format):
     if magic.from_file(from_file, mime=True) == "application/pdf":
         convert_from_path(
             from_file,
+            dpi=100,
             output_folder=os.path.dirname(to_file),
             fmt=image_format,
             single_file=True,
             output_file=os.path.splitext(os.path.basename(to_file))[0],
         )
     else:
-        Image.open(from_file).save(to_file, image_format)
-    return to_file
+        Image.open(from_file).save(to_file, format=image_format)
+    
+    return compress_png(to_file, image_format)
 
 
 def rotate_image(filename, line, sdir, image_list):
