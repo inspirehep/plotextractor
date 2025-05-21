@@ -28,4 +28,4 @@ from .api import process_tarball
 
 __all__ = ("process_tarball",)
 
-__version__ = "1.0.17"
+__version__ = "1.0.18"
