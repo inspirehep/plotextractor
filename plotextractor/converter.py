@@ -28,6 +28,7 @@ import os
 import tarfile
 import re
 import sys
+import subprocess
 from time import time
 from pdf2image import convert_from_path
 
@@ -202,6 +203,7 @@ def convert_images(image_list, image_format="png", timeout=20):
                 PDFInfoNotInstalledError,
                 PDFPageCountError,
                 PDFSyntaxError,
+                subprocess.CalledProcessError,
             ):
                 # Too bad, cannot convert image format.
                 continue
