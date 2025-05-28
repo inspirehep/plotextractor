@@ -86,6 +86,11 @@ def tarball_subfloat():
     return os.path.join(os.path.dirname(__file__), "data", "2203.14536.tar.gz")
 
 
+@pytest.fixture
+def tarball_with_subproccess_error():
+    """Return path to testdata with subproccess error."""
+    return os.path.join(os.path.dirname(__file__), "data", "2212.00763.tar.gz")
+
 def test_process_api(tarball_flat):
     """Test simple API for extracting and linking files to TeX."""
     plots = plotextractor.process_tarball(tarball_flat)
@@ -228,3 +233,9 @@ def test_process_api_with_include(tarball_test_for_include):
     assert "original_url" in plots[0]
     assert "captions" in plots[0]
     assert "name" in plots[0]
+
+
+def test_process_api_with_subprocess_error(tarball_with_subproccess_error):
+    """Test subprocess error handling."""
+    plots = plotextractor.process_tarball(tarball_with_subproccess_error, context=True)
+    assert len(plots) == 132

@@ -55,3 +55,5 @@ CHANGELOG
 .eggs
 .idea
 *gz_files
+tests/.DS_Store
+tests/data/.DS_Store
