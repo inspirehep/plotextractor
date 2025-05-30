@@ -34,6 +34,7 @@ requirements = [
     "six>=1.7.2",
     "pillow>=6.2.2",
     "pdf2image==1.7.1",
+    "pylatexenc==2.10",
 ]
 
 test_requirements = ["coverage>=4.0.0", "pytest>=2.8.0", "pytest-cov>=2.1.0"]

@@ -82,3 +82,30 @@ def test_get_image_location_includegraphics(tmpdir):
     assert path == plotextractor.output_utils.get_image_location(
         image, six.text_type(tmpdir), image_list
     )
+
+
+def test_find_open_and_close_braces_multiple_curlies():
+    test_str = ["\\includegraphics[width=0.25\linewidth]{{{frog2.jpg}}}"]
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(
+        0, 0, test_str
+    )
+
+    assert filename == "frog2.jpg"
+
+
+def test_find_open_and_close_braces_different_line():
+    test_str = [r"\includegraphics[width=0.25\linewidth]", r"{frog.jpg}"]
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(
+        0, 0, test_str
+    )
+
+    assert filename == "frog.jpg"
+
+
+def test_find_open_and_close_braces_options_with_curlies():
+    test_str = [r"|\includegraphics[width={0.25\linewidth}]{frog.jpg}"]
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(
+        0, 0, test_str
+    )
+
+    assert filename == "frog.jpg"

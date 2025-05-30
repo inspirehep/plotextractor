@@ -28,6 +28,7 @@ import re
 import sys
 
 from collections import OrderedDict
+from pylatexenc.latexwalker import LatexWalker, LatexMacroNode
 
 
 def find_open_and_close_braces(line_index, start, brace, lines):
@@ -424,3 +425,27 @@ def get_name_from_path(full_path, root_path):
         .replace(";", "")
         .replace(":", "")
     )
+
+
+def get_filename_from_includegraphics(
+    line_index,
+    index,
+    lines,
+):
+    # if definition of filename in not in same line, continue till it finds it
+    for i in range(line_index + 1, len(lines) + 1):
+        latex_code = r"".join(lines[line_index:i])
+
+        walker = LatexWalker(latex_code)
+        nodes, _, _ = walker.get_latex_nodes(pos=index)
+        for node in nodes:
+            if (
+                node.isNodeType(LatexMacroNode)
+                and node.macroname == "includegraphics"
+                and node.nodeargd
+            ):
+                args = node.nodeargd.argnlist
+                if len(args) >= 2:
+                    filename_node = args[1]
+                    return re.sub(r"[{}]", "", filename_node.latex_verbatim())
+    return ""

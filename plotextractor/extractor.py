@@ -38,6 +38,7 @@ from .config import (
 from .output_utils import (
     assemble_caption,
     find_open_and_close_braces,
+    get_filename_from_includegraphics,
     get_tex_location,
 )
 from .converter import rotate_image
@@ -352,10 +353,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
         """
         index = line.find(includegraphics_head)
         if index > -1:
-            open_curly, open_curly_line, close_curly, dummy = (
-                find_open_and_close_braces(line_index, index, "{", lines)
-            )
-            filename = lines[open_curly_line][open_curly + 1 : close_curly]
+            filename = get_filename_from_includegraphics(line_index, index, lines)
             if cur_image == "":
                 cur_image = filename
             elif isinstance(cur_image, list):
@@ -510,12 +508,7 @@ def extract_captions(tex_file, sdir, image_list, primary=True):
             if line_index == len(lines):
                 # didn't find the image name on line
                 line_index = index_cpy
-
-            open_curly, open_curly_line, close_curly, dummy = (
-                find_open_and_close_braces(line_index, index, "{", lines)
-            )
-            sub_image = lines[open_curly_line][open_curly + 1 : close_curly]
-
+            sub_image = get_filename_from_includegraphics(line_index, index, lines)
             cur_image[SUB_CAPTION_OR_IMAGE].append(sub_image)
 
         r"""
