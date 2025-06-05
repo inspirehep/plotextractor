@@ -432,6 +432,9 @@ def get_filename_from_includegraphics(
     index,
     lines,
 ):
+    if index == -1:
+        return ""
+
     # if definition of filename in not in same line, continue till it finds it
     for i in range(line_index + 1, len(lines) + 1):
         latex_code = r"".join(lines[line_index:i])

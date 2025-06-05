@@ -109,3 +109,11 @@ def test_find_open_and_close_braces_options_with_curlies():
     )
 
     assert filename == "frog.jpg"
+
+
+def test_get_filename_invalid_line():
+    test_str = [""]
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(
+        0, -1, test_str
+    )
+    assert filename == ""
