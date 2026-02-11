@@ -32,11 +32,6 @@ import subprocess
 from time import time
 from pdf2image import convert_from_path
 
-if sys.version_info[0] == 2:
-    from subprocess32 import check_output
-else:
-    from subprocess import check_output
-
 import magic
 from PIL import Image
 
@@ -49,6 +44,7 @@ from .errors import InvalidTarball
 from .output_utils import get_converted_image_name, get_image_location
 
 MAX_BYTES = 5 * 1024 * 1024  # 5 MB cap
+
 
 def compress_png(path, image_format):
     """
@@ -65,9 +61,10 @@ def compress_png(path, image_format):
             img = Image.open(path)
             pal = img.convert("P", palette=Image.ADAPTIVE, colors=256)
             pal.save(path, format=image_format, optimize=True)
-        except Exception as e:
+        except Exception:
             return None
     return path
+
 
 def untar(original_tarball, output_directory):
     """Untar given tarball file into directory.
@@ -170,7 +167,6 @@ def convert_images(image_list, image_format="png", timeout=20):
     :return: image_mapping ({new_image: original_image, ...]): The mapping of
         image files when all have been converted to PNG format.
     """
-    png_output_contains = b"PNG image"
     image_mapping = {}
     for image_file in image_list:
         if os.path.isdir(image_file):
@@ -179,8 +175,7 @@ def convert_images(image_list, image_format="png", timeout=20):
         if not os.path.exists(image_file):
             continue
 
-        cmd_out = check_output(["file", image_file], timeout=timeout)
-        if cmd_out.find(png_output_contains) > -1:
+        if magic.from_file(image_file, mime=True) == "image/png":
             # Already PNG - Compress if needed
             image_file_path = compress_png(image_file, image_format)
             if image_file_path:
@@ -226,7 +221,7 @@ def convert_image(from_file, to_file, image_format):
         )
     else:
         Image.open(from_file).save(to_file, format=image_format)
-    
+
     return compress_png(to_file, image_format)
 
 
