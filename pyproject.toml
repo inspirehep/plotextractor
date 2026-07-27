@@ -1,0 +1,41 @@
+[project]
+name = "plotextractor"
+version = "1.0.22"
+description = "A small library for extracting plots used in scholarly communication."
+authors = [{ name = "CERN", email = "admin@inspirehep.net" }]
+license = "GPL-2.0-only"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["plots", "figures", "extraction", "TeX", "LaTeX"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "python-magic",
+    "six>=1.7.2",
+    "pillow>=6.2.2",
+    "pdf2image==1.7.1",
+    "pylatexenc==2.10",
+]
+
+[project.optional-dependencies]
+tests = [
+    "coverage>=4.0.0",
+    "pytest>=2.8.0",
+    "pytest-cov>=2.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/inspirehep/plotextractor"
+Repository = "https://github.com/inspirehep/plotextractor"
+
+[tool.poetry]
+packages = [{ include = "plotextractor" }]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
