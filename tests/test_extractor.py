@@ -1,12 +1,10 @@
-import os
-import pkg_resources
+from pathlib import Path
+
 from plotextractor.extractor import extract_captions
 
 
 def test_get_with_trim(tmpdir):
-    latex_filename = pkg_resources.resource_filename(
-        __name__, os.path.join("data", "main_trim.tex")
-    )
+    latex_filename = str(Path(__file__).parent / "data" / "main_trim.tex")
 
     partly_extracted_image_data = extract_captions(latex_filename, tmpdir, [])
     assert any(
