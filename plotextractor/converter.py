@@ -24,6 +24,7 @@
 
 """Functions related to conversion and untarring."""
 
+import ntpath
 import os
 import tarfile
 import re
@@ -66,6 +67,58 @@ def compress_png(path, image_format):
     return path
 
 
+def is_within_directory(directory, target):
+    """Return True if ``target`` is ``directory`` itself or below it."""
+    try:
+        relative_path = os.path.relpath(target, directory)
+    except ValueError:
+        return False
+    return relative_path != os.pardir and not relative_path.startswith(
+        os.pardir + os.sep
+    )
+
+
+def traverses_on_windows(name):
+    """Return True if ``name`` escapes when the path is read by Windows.
+
+    Backslash is an ordinary filename character on POSIX, so a member named
+    ``..\\..\\etc\\passwd`` extracts harmlessly into the destination here.
+    It becomes a traversal the moment the extracted tree is opened on
+    Windows or served over SMB, so the check runs on every platform. No
+    legitimate source file traverses this way, so it costs nothing.
+    """
+    if ntpath.isabs(name) or ntpath.splitdrive(name)[0]:
+        return True
+    normalized = ntpath.normpath(name)
+    return normalized == ntpath.pardir or normalized.startswith(
+        ntpath.pardir + ntpath.sep
+    )
+
+
+def safe_members(members, output_directory):
+    """Return the members that are safe to extract into ``output_directory``.
+
+    Anything else is skipped rather than aborting the archive, which is how
+    the rest of this module already treats individual files it cannot
+    handle.
+    """
+    destination = os.path.realpath(output_directory)
+    safe = []
+    for member in members:
+        # Symlinks, hard links and device nodes can all redirect a later
+        # write outside the destination.
+        if not (member.isfile() or member.isdir()):
+            continue
+        if traverses_on_windows(member.name):
+            continue
+        # realpath resolves ".." and any symlink already in the destination.
+        target = os.path.realpath(os.path.join(destination, member.name))
+        if not is_within_directory(destination, target):
+            continue
+        safe.append(member)
+    return safe
+
+
 def untar(original_tarball, output_directory):
     """Untar given tarball file into directory.
 
@@ -83,13 +136,14 @@ def untar(original_tarball, output_directory):
     tarball = tarfile.open(original_tarball)
     # set mtimes of members to now
     epochsecs = int(time())
-    for member in tarball.getmembers():
+    members = safe_members(tarball.getmembers(), output_directory)
+    for member in members:
         member.mtime = epochsecs
-    tarball.extractall(output_directory)
+    tarball.extractall(output_directory, members=members)
 
     file_list = []
 
-    for extracted_file in tarball.getnames():
+    for extracted_file in (member.name for member in members):
         if extracted_file == "":
             break
         if extracted_file.startswith("./"):

@@ -24,12 +24,120 @@
 
 import pytest
 import magic
+import io
 import os
 import pkg_resources
+import tarfile
 from shutil import rmtree
 from tempfile import mkdtemp
 
 from plotextractor.converter import detect_images_and_tex, untar, convert_images
+
+
+def write_tarball(path, members):
+    """Build a tarball from (name, tarfile type) pairs."""
+    with tarfile.open(str(path), "w") as tarball:
+        for name, member_type in members:
+            member = tarfile.TarInfo(name)
+            member.type = member_type
+            if member_type == tarfile.REGTYPE:
+                content = b"content"
+                member.size = len(content)
+                tarball.addfile(member, io.BytesIO(content))
+            else:
+                member.linkname = "../outside.txt"
+                tarball.addfile(member)
+
+
+def test_untar_skips_members_that_escape_the_destination(tmpdir):
+    archive = tmpdir.join("traversal.tar")
+    destination = tmpdir.mkdir("destination")
+    write_tarball(
+        archive,
+        [
+            ("safe.txt", tarfile.REGTYPE),
+            ("../outside.txt", tarfile.REGTYPE),
+            ("../../outside.txt", tarfile.REGTYPE),
+            ("/outside.txt", tarfile.REGTYPE),
+        ],
+    )
+
+    extracted = untar(str(archive), str(destination))
+
+    assert extracted == [str(destination.join("safe.txt"))]
+    assert sorted(os.listdir(str(destination))) == ["safe.txt"]
+    assert not tmpdir.join("outside.txt").exists()
+
+
+def test_untar_skips_members_that_escape_under_windows_rules(tmpdir):
+    """Backslashes are ordinary on POSIX, but not once the tree reaches Windows."""
+    archive = tmpdir.join("windows-traversal.tar")
+    destination = tmpdir.mkdir("destination")
+    write_tarball(
+        archive,
+        [
+            ("safe.txt", tarfile.REGTYPE),
+            ("..\\outside.txt", tarfile.REGTYPE),
+            ("..\\..\\outside.txt", tarfile.REGTYPE),
+            ("C:\\outside.txt", tarfile.REGTYPE),
+        ],
+    )
+
+    extracted = untar(str(archive), str(destination))
+
+    assert extracted == [str(destination.join("safe.txt"))]
+    assert sorted(os.listdir(str(destination))) == ["safe.txt"]
+
+
+def test_untar_skips_links_and_device_nodes(tmpdir):
+    archive = tmpdir.join("link.tar")
+    destination = tmpdir.mkdir("destination")
+    write_tarball(
+        archive,
+        [
+            ("paper.tex", tarfile.REGTYPE),
+            ("symlink", tarfile.SYMTYPE),
+            ("hardlink", tarfile.LNKTYPE),
+            ("chardev", tarfile.CHRTYPE),
+            ("blockdev", tarfile.BLKTYPE),
+            ("fifo", tarfile.FIFOTYPE),
+        ],
+    )
+
+    extracted = untar(str(archive), str(destination))
+
+    assert extracted == [str(destination.join("paper.tex"))]
+    assert sorted(os.listdir(str(destination))) == ["paper.tex"]
+
+
+def test_untar_skips_paths_through_an_existing_symlink(tmpdir):
+    archive = tmpdir.join("symlink-path.tar")
+    destination = tmpdir.mkdir("destination")
+    outside = tmpdir.mkdir("outside")
+    os.symlink(str(outside), str(destination.join("linked")))
+    write_tarball(
+        archive,
+        [("paper.tex", tarfile.REGTYPE), ("linked/file.txt", tarfile.REGTYPE)],
+    )
+
+    extracted = untar(str(archive), str(destination))
+
+    assert extracted == [str(destination.join("paper.tex"))]
+    assert not outside.join("file.txt").exists()
+
+
+def test_untar_keeps_names_that_are_valid_on_this_platform(tmpdir):
+    """Names Windows dislikes are ordinary on POSIX and must still extract."""
+    archive = tmpdir.join("latex.tar")
+    destination = tmpdir.mkdir("destination")
+    names = ["main.tex", "aux/fig1.png", "con.tex", "figure."]
+    write_tarball(archive, [(name, tarfile.REGTYPE) for name in names])
+
+    extracted = untar(str(archive), str(destination))
+
+    assert extracted == [str(destination.join(name)) for name in names]
+    for name in names:
+        assert destination.join(name).check()
 
 
 def test_detect_images_and_tex_ignores_hidden_metadata_files():
