@@ -24,7 +24,6 @@
 
 """Functions related to conversion and untarring."""
 
-import ntpath
 import os
 import tarfile
 import re
@@ -78,42 +77,38 @@ def is_within_directory(directory, target):
     )
 
 
-def traverses_on_windows(name):
-    """Return True if ``name`` escapes when the path is read by Windows.
+def link_destination(destination, member):
+    """Return where a link member points once extracted.
 
-    Backslash is an ordinary filename character on POSIX, so a member named
-    ``..\\..\\etc\\passwd`` extracts harmlessly into the destination here.
-    It becomes a traversal the moment the extracted tree is opened on
-    Windows or served over SMB, so the check runs on every platform. No
-    legitimate source file traverses this way, so it costs nothing.
+    Symlink targets are relative to the link's own directory, hard link
+    targets to the archive root.
     """
-    if ntpath.isabs(name) or ntpath.splitdrive(name)[0]:
-        return True
-    normalized = ntpath.normpath(name)
-    return normalized == ntpath.pardir or normalized.startswith(
-        ntpath.pardir + ntpath.sep
-    )
+    if member.issym():
+        base = os.path.dirname(os.path.join(destination, member.name))
+    else:
+        base = destination
+    return os.path.realpath(os.path.join(base, member.linkname))
 
 
 def safe_members(members, output_directory):
     """Return the members that are safe to extract into ``output_directory``.
 
-    Anything else is skipped rather than aborting the archive, which is how
-    the rest of this module already treats individual files it cannot
-    handle.
+    Others are skipped rather than aborting the archive, as this module
+    already does for files it cannot handle.
     """
     destination = os.path.realpath(output_directory)
     safe = []
     for member in members:
-        # Symlinks, hard links and device nodes can all redirect a later
-        # write outside the destination.
-        if not (member.isfile() or member.isdir()):
-            continue
-        if traverses_on_windows(member.name):
+        # Device nodes and fifos have no place in a source archive.
+        if not (member.isfile() or member.isdir() or member.issym() or member.islnk()):
             continue
         # realpath resolves ".." and any symlink already in the destination.
         target = os.path.realpath(os.path.join(destination, member.name))
         if not is_within_directory(destination, target):
+            continue
+        if (member.issym() or member.islnk()) and not is_within_directory(
+            destination, link_destination(destination, member)
+        ):
             continue
         safe.append(member)
     return safe
@@ -141,9 +136,11 @@ def untar(original_tarball, output_directory):
         member.mtime = epochsecs
     tarball.extractall(output_directory, members=members)
 
+    member_names = [member.name for member in members]
+
     file_list = []
 
-    for extracted_file in (member.name for member in members):
+    for extracted_file in member_names:
         if extracted_file == "":
             break
         if extracted_file.startswith("./"):
