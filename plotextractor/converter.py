@@ -90,6 +90,23 @@ def link_destination(destination, member):
     return os.path.realpath(os.path.join(base, member.linkname))
 
 
+def path_components(path):
+    """Split a tar path, dropping empty and ``.`` segments."""
+    return [segment for segment in path.split("/") if segment and segment != os.curdir]
+
+
+def traverses(components, archive_symlinks):
+    """Return True if a leading part of ``components`` is an archive symlink.
+
+    Such a path does not land where realpath computed it, since realpath
+    reads the destination as it is before the extraction.
+    """
+    return any(
+        "/".join(components[:index]) in archive_symlinks
+        for index in range(1, len(components) + 1)
+    )
+
+
 def safe_members(members, output_directory):
     """Return the members that are safe to extract into ``output_directory``.
 
@@ -98,19 +115,37 @@ def safe_members(members, output_directory):
     """
     destination = os.path.realpath(output_directory)
     safe = []
+    archive_symlinks = set()
+    # tarfile resolves a hard link with no target on disk by extracting the
+    # member that link names, so a hard link may put back a skipped member.
+    extracted_files = set()
     for member in members:
         # Device nodes and fifos have no place in a source archive.
         if not (member.isfile() or member.isdir() or member.issym() or member.islnk()):
+            continue
+        components = path_components(member.name)
+        if traverses(components, archive_symlinks):
             continue
         # realpath resolves ".." and any symlink already in the destination.
         target = os.path.realpath(os.path.join(destination, member.name))
         if not is_within_directory(destination, target):
             continue
-        if (member.issym() or member.islnk()) and not is_within_directory(
-            destination, link_destination(destination, member)
-        ):
-            continue
+        if member.issym() or member.islnk():
+            linked = path_components(member.linkname)
+            reached = components[:-1] + linked if member.issym() else linked
+            if traverses(reached, archive_symlinks):
+                continue
+            if not is_within_directory(
+                destination, link_destination(destination, member)
+            ):
+                continue
+            if member.islnk() and "/".join(linked) not in extracted_files:
+                continue
         safe.append(member)
+        if member.issym():
+            archive_symlinks.add("/".join(components))
+        if member.isfile() or member.islnk():
+            extracted_files.add("/".join(components))
     return safe
 
 

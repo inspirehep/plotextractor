@@ -119,6 +119,47 @@ def test_untar_keeps_links_that_stay_inside_the_destination(tmpdir):
     assert os.path.realpath(str(destination.join("figs", "a_soft.png"))) == original
 
 
+def test_untar_skips_hard_links_to_a_skipped_member(tmpdir):
+    """A hard link to a refused member would put that member back."""
+    archive = tmpdir.join("resurrect.tar")
+    destination = tmpdir.mkdir("destination")
+    write_tarball(
+        archive,
+        [
+            ("paper.tex", tarfile.REGTYPE),
+            ("escaping", tarfile.SYMTYPE, "/etc/passwd"),
+            ("innocent", tarfile.LNKTYPE, "escaping"),
+        ],
+    )
+
+    extracted = untar(str(archive), str(destination))
+
+    assert extracted == [str(destination.join("paper.tex"))]
+    assert sorted(os.listdir(str(destination))) == ["paper.tex"]
+
+
+def test_untar_skips_members_that_traverse_a_symlink_in_the_archive(tmpdir):
+    """A ".." resolves inside until a symlink of the archive is on disk."""
+    archive = tmpdir.join("chain.tar")
+    destination = tmpdir.mkdir("destination")
+    write_tarball(
+        archive,
+        [
+            ("chapter", tarfile.DIRTYPE),
+            ("chapter/../main.tex", tarfile.REGTYPE),
+            ("here", tarfile.SYMTYPE, "."),
+            ("here/../pwned.txt", tarfile.REGTYPE),
+        ],
+    )
+
+    extracted = untar(str(archive), str(destination))
+
+    names = ["chapter", "chapter/../main.tex", "here"]
+    assert extracted == [os.path.join(str(destination), name) for name in names]
+    assert destination.join("main.tex").check()
+    assert not tmpdir.join("pwned.txt").exists()
+
+
 def test_untar_skips_paths_through_an_existing_symlink(tmpdir):
     archive = tmpdir.join("symlink-path.tar")
     destination = tmpdir.mkdir("destination")
