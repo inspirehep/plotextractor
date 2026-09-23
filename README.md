@@ -38,23 +38,17 @@ your version of GhostScript.
 ## License
 GPLv2
 
-## Local Development
+## Local Development with docker
 
 Build it using
 ```shell
-# python 2.7
-docker build -t plotextractor2 -f Dockerfile.py2 .
-# python 3.11
-docker build -t plotextractor3 -f Dockerfile .
+docker build -t plotextractor  .
 ```
 Spin up container with library installed
 ```shell
-# python 2.7
-docker run -it -v ./tests:/code/tests -v ./plotextractor:/code/plotextractor --name plotextractor2 plotextractor2
-# python 3.11
-docker run -it -v ./tests:/code/tests -v ./plotextractor:/code/plotextractor --name plotextractor3 plotextractor3
+docker run -it plotextractor
 ```
 Run tests
 ```
-pytest .
+poetry run pytest .
 ```

@@ -9,7 +9,6 @@ repos:
       - id: mixed-line-ending
       - id: name-tests-test
         args: [ --pytest-test-first ]
-        exclude: '^(?!factories/)'
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.6.9
     hooks:

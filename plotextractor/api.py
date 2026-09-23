@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
 # Copyright (C) 2015, 2020 CERN.
@@ -26,15 +25,15 @@
 
 import os
 
-from .extractor import (
+from plotextractor.converter import convert_images, detect_images_and_tex, untar
+from plotextractor.errors import NoTexFilesFound
+from plotextractor.extractor import (
     extract_captions,
     extract_context,
 )
-from .converter import convert_images, untar, detect_images_and_tex
-from .output_utils import (
+from plotextractor.output_utils import (
     prepare_image_data,
 )
-from .errors import NoTexFilesFound
 
 
 def process_tarball(tarball, output_directory=None, context=False):
@@ -73,9 +72,7 @@ def process_tarball(tarball, output_directory=None, context=False):
         raise NoTexFilesFound("No TeX files found in {0}".format(tarball))
 
     converted_image_mapping = convert_images(image_list)
-    return map_images_in_tex(
-        tex_files, converted_image_mapping, output_directory, context
-    )
+    return map_images_in_tex(tex_files, converted_image_mapping, output_directory, context)
 
 
 def map_images_in_tex(tex_files, image_mapping, output_directory, context=False):

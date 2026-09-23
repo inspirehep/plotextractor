@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
 # Copyright (C) 2015, 2016, 2020 CERN.
@@ -23,97 +22,73 @@
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 
-import six
 import plotextractor
 
 
 def test_get_image_location_ok(tmpdir):
     image = "img/img.png"
-    path = six.text_type(tmpdir.mkdir("img").join("img.png"))
+    path = str(tmpdir.mkdir("img").join("img.png"))
     image_list = [path]
 
-    assert path == plotextractor.output_utils.get_image_location(
-        image, six.text_type(tmpdir), image_list
-    )
+    assert path == plotextractor.output_utils.get_image_location(image, str(tmpdir), image_list)
 
 
 def test_get_image_location_unicode_path_ok(tmpdir):
     image = "ąþð/→µŋ.png"
-    path = six.text_type(
-        tmpdir.mkdir(six.ensure_text("ąþð")).join(six.ensure_text("→µŋ.png"))
-    )
+    path = str(tmpdir.mkdir("ąþð").join("→µŋ.png"))
     image_list = [path]
 
-    assert path == plotextractor.output_utils.get_image_location(
-        image, six.text_type(tmpdir), image_list
-    )
+    assert path == plotextractor.output_utils.get_image_location(image, str(tmpdir), image_list)
 
 
 def test_get_image_location_missing_subfolder(tmpdir):
     image = "img.png"
     path = tmpdir.mkdir("fig").join(image)
     path.write("test")
-    filepath = six.text_type(path)
+    filepath = str(path)
     image_list = [filepath]
 
-    assert filepath == plotextractor.output_utils.get_image_location(
-        image, six.text_type(tmpdir), image_list
-    )
+    assert filepath == plotextractor.output_utils.get_image_location(image, str(tmpdir), image_list)
 
 
 def test_get_image_location_not_ok(tmpdir):
     image = "notanimage"
-    path = six.text_type(tmpdir.mkdir("images").join("some.img"))
+    path = str(tmpdir.mkdir("images").join("some.img"))
     image_list = [path]
 
-    assert (
-        plotextractor.output_utils.get_image_location(
-            image, six.text_type(tmpdir), image_list
-        )
-        is None
-    )
+    assert plotextractor.output_utils.get_image_location(image, str(tmpdir), image_list) is None
 
 
 def test_get_image_location_includegraphics(tmpdir):
     image = "\\includegraphics{some}"
-    path = six.text_type(tmpdir.join("some.png"))
+    path = str(tmpdir.join("some.png"))
     image_list = [path]
 
-    assert path == plotextractor.output_utils.get_image_location(
-        image, six.text_type(tmpdir), image_list
-    )
+    assert path == plotextractor.output_utils.get_image_location(image, str(tmpdir), image_list)
 
 
 def test_find_open_and_close_braces_multiple_curlies():
     test_str = ["\\includegraphics[width=0.25\linewidth]{{{frog2.jpg}}}"]
-    filename = plotextractor.output_utils.get_filename_from_includegraphics(
-        0, 0, test_str
-    )
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(0, 0, test_str)
 
     assert filename == "frog2.jpg"
 
 
 def test_find_open_and_close_braces_different_line():
     test_str = [r"\includegraphics[width=0.25\linewidth]", r"{frog.jpg}"]
-    filename = plotextractor.output_utils.get_filename_from_includegraphics(
-        0, 0, test_str
-    )
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(0, 0, test_str)
 
     assert filename == "frog.jpg"
 
 
 def test_find_open_and_close_braces_options_with_curlies():
     test_str = [r"|\includegraphics[width={0.25\linewidth}]{frog.jpg}"]
-    filename = plotextractor.output_utils.get_filename_from_includegraphics(
-        0, 0, test_str
-    )
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(0, 0, test_str)
 
     assert filename == "frog.jpg"
 
 
 def test_get_filename_invalid_line():
     test_str = [""]
-    filename = plotextractor.output_utils.get_filename_from_includegraphics(
-        0, -1, test_str
-    )
+    filename = plotextractor.output_utils.get_filename_from_includegraphics(0, -1, test_str)
     assert filename == ""
