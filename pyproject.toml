@@ -1,6 +1,6 @@
 [project]
 name = "plotextractor"
-version = "1.0.23"
+version = "1.0.24"
 description = "A small library for extracting plots used in scholarly communication."
 authors = [{ name = "CERN", email = "admin@inspirehep.net" }]
 license = "GPL-2.0-only"

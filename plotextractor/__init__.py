@@ -27,4 +27,4 @@ from plotextractor.api import process_tarball
 
 __all__ = ("process_tarball",)
 
-__version__ = "1.0.23"
+__version__ = "1.0.24"
