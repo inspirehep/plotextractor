@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
 # Copyright (C) 2015, 2016, 2020 CERN.
@@ -25,9 +24,9 @@
 
 import os
 import tempfile
-import six
 
 import pytest
+
 import plotextractor
 from plotextractor import process_tarball
 
@@ -90,6 +89,7 @@ def tarball_subfloat():
 def tarball_with_subproccess_error():
     """Return path to testdata with subproccess error."""
     return os.path.join(os.path.dirname(__file__), "data", "2212.00763.tar.gz")
+
 
 def test_process_api(tarball_flat):
     """Test simple API for extracting and linking files to TeX."""
@@ -192,9 +192,8 @@ def test_process_api_with_subfloats(tarball_subfloat):
 
 def test_process_api_invalid_text():
     """Test simple API for extracting and linking files to TeX."""
-    with tempfile.NamedTemporaryFile() as f:
-        with pytest.raises(plotextractor.errors.InvalidTarball):
-            plotextractor.process_tarball(f.name)
+    with tempfile.NamedTemporaryFile() as f, pytest.raises(plotextractor.errors.InvalidTarball):
+        plotextractor.process_tarball(f.name)
 
 
 def test_process_api_no_tex(tarball_no_tex):
@@ -214,13 +213,11 @@ def test_process_tarball_with_wrong_utf_path_inside(tarball_with_wrong_utf):
     """Test simple API for extracting and linking files to TeX context."""
 
     temporary_dir = tempfile.mkdtemp()
-    plots = plotextractor.process_tarball(
-        tarball_with_wrong_utf, temporary_dir, context=True
-    )
+    plots = plotextractor.process_tarball(tarball_with_wrong_utf, temporary_dir, context=True)
     assert len(plots) == 1
     assert temporary_dir + "/cute_cat.png" in plots[0]["url"]
-    captions = six.ensure_text(plots[0]["captions"][0], encoding="utf-8")
-    assert captions == six.ensure_text("słodki kociak!", encoding="utf-8")
+    captions = plots[0]["captions"][0]
+    assert captions == "słodki kociak!"
     assert plots[0]["name"] == "cute_cat"
 
 

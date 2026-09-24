@@ -6,9 +6,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -19,22 +23,21 @@ jobs:
         run: |
           sudo sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
 
-
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools twine wheel coveralls
-          pip install -e .[tests]
+          python -m pip install poetry==2.2.1
+          poetry install --with tests
 
       - name: Show python dependencies
         run: |
-          pip freeze
+          poetry show
 
       - name: Run tests
         run: |
-            pytest tests
+          poetry run pytest tests

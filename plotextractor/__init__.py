@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
 # Copyright (C) 2015, 2020 CERN.
@@ -24,7 +23,7 @@
 
 """Plotextractor API."""
 
-from .api import process_tarball
+from plotextractor.api import process_tarball
 
 __all__ = ("process_tarball",)
 

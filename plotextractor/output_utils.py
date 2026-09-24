@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
 # Copyright (C) 2010, 2011, 2014, 2015, 2016, 2020 CERN.
@@ -25,10 +24,9 @@
 
 import os
 import re
-import sys
-
 from collections import OrderedDict
-from pylatexenc.latexwalker import LatexWalker, LatexMacroNode
+
+from pylatexenc.latexwalker import LatexMacroNode, LatexWalker
 
 
 def find_open_and_close_braces(line_index, start, brace, lines):
@@ -157,8 +155,8 @@ def assemble_caption(begin_line, begin_index, end_line, end_index, lines):
     if label_begin > -1:
         # we know that our caption is only one line, so if there's a label
         # tag in it, it will be all on one line.  so we make up some args
-        dummy_start, dummy_start_line, label_end, dummy_end = (
-            find_open_and_close_braces(0, label_begin, "{", [caption])
+        dummy_start, dummy_start_line, label_end, dummy_end = find_open_and_close_braces(
+            0, label_begin, "{", [caption]
         )
         caption = caption[:label_begin] + caption[label_end + 1 :]
 
@@ -187,15 +185,9 @@ def prepare_image_data(extracted_image_data, output_directory, image_mapping):
     for image, caption, label in extracted_image_data:
         if not image or image == "ERROR":
             continue
-        image_location = get_image_location(
-            image, output_directory, image_mapping.keys()
-        )
+        image_location = get_image_location(image, output_directory, image_mapping.keys())
 
-        if (
-            not image_location
-            or not os.path.exists(image_location)
-            or len(image_location) < 3
-        ):
+        if not image_location or not os.path.exists(image_location) or len(image_location) < 3:
             continue
 
         image_location = os.path.normpath(image_location)
@@ -227,7 +219,7 @@ def get_image_location(image, sdir, image_list, recurred=False):
     if isinstance(image, list):
         # image is a list, not good
         return None
-    image = image.decode("utf-8") if sys.version_info[0] == 2 else str(image)
+    image = str(image)
     image = image.strip()
 
     figure_or_file = "(figure=|file=)"
@@ -391,9 +383,7 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
     if os.path.isdir(os.path.join(current_dir, new_tex_folder)):
         for any_file in os.listdir(os.path.join(current_dir, new_tex_folder)):
             if any_file == new_tex_file:
-                return os.path.join(
-                    os.path.join(current_dir, new_tex_folder), new_tex_file
-                )
+                return os.path.join(os.path.join(current_dir, new_tex_folder), new_tex_file)
 
     # could be in a subfolder of a higher directory
     one_dir_up = os.path.join(os.path.split(current_dir)[0], new_tex_folder)
@@ -402,9 +392,7 @@ def get_tex_location(new_tex_name, current_tex_name, recurred=False):
             if any_file == new_tex_file:
                 return os.path.join(one_dir_up, new_tex_file)
 
-    two_dirs_up = os.path.join(
-        os.path.split(os.path.split(current_dir)[0])[0], new_tex_folder
-    )
+    two_dirs_up = os.path.join(os.path.split(os.path.split(current_dir)[0])[0], new_tex_folder)
     if os.path.isdir(two_dirs_up):
         for any_file in os.listdir(two_dirs_up):
             if any_file == new_tex_file:

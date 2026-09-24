@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of plotextractor.
 # Copyright (C) 2010, 2011, 2015, 2016, 2020 CERN.
@@ -25,23 +24,22 @@
 """Functions related to conversion and untarring."""
 
 import os
-import tarfile
 import re
-import sys
 import subprocess
+import tarfile
 from time import time
-from pdf2image import convert_from_path
 
 import magic
-from PIL import Image
-
+from pdf2image import convert_from_path
 from pdf2image.exceptions import (
     PDFInfoNotInstalledError,
     PDFPageCountError,
     PDFSyntaxError,
 )
-from .errors import InvalidTarball
-from .output_utils import get_converted_image_name, get_image_location
+from PIL import Image
+
+from plotextractor.errors import InvalidTarball
+from plotextractor.output_utils import get_converted_image_name, get_image_location
 
 MAX_BYTES = 5 * 1024 * 1024  # 5 MB cap
 
@@ -72,9 +70,7 @@ def is_within_directory(directory, target):
         relative_path = os.path.relpath(target, directory)
     except ValueError:
         return False
-    return relative_path != os.pardir and not relative_path.startswith(
-        os.pardir + os.sep
-    )
+    return relative_path != os.pardir and not relative_path.startswith(os.pardir + os.sep)
 
 
 def link_destination(destination, member):
@@ -102,8 +98,7 @@ def traverses(components, archive_symlinks):
     reads the destination as it is before the extraction.
     """
     return any(
-        "/".join(components[:index]) in archive_symlinks
-        for index in range(1, len(components) + 1)
+        "/".join(components[:index]) in archive_symlinks for index in range(1, len(components) + 1)
     )
 
 
@@ -135,9 +130,7 @@ def safe_members(members, output_directory):
             reached = components[:-1] + linked if member.issym() else linked
             if traverses(reached, archive_symlinks):
                 continue
-            if not is_within_directory(
-                destination, link_destination(destination, member)
-            ):
+            if not is_within_directory(destination, link_destination(destination, member)):
                 continue
             if member.islnk() and "/".join(linked) not in extracted_files:
                 continue
@@ -208,12 +201,11 @@ def detect_images_and_tex(
     might_be_tex = []
 
     for extracted_file in file_list:
-        # Ignore directories and hidden (metadata) files
-        if re.search(r"[\uD800-\uDFFF]", extracted_file) and sys.version_info[0] == 3:
-            # Illegal file path/name
-            continue
-        if os.path.isdir(extracted_file) or os.path.basename(extracted_file).startswith(
-            "."
+        # Ignore files with illegal paths, directories and hidden (metadata) files
+        if (
+            re.search(r"[\uD800-\uDFFF]", extracted_file)
+            or os.path.isdir(extracted_file)
+            or os.path.basename(extracted_file).startswith(".")
         ):
             continue
 
