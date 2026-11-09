@@ -19,10 +19,6 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update -y && sudo apt-get install -y ghostscript poppler-utils
 
-      - name: Fix ImageMagick GhostScript permissions
-        run: |
-          sudo sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
-
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
