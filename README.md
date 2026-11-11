@@ -11,6 +11,25 @@ A small library for extracting plots used in scholarly communication.
 $ pip install plotextractor
 ```
 
+### System requirements
+
+Image conversion relies on the following system packages:
+
+- [Ghostscript](https://www.ghostscript.com/): converts EPS/PS figures (used by Pillow)
+- [Poppler](https://poppler.freedesktop.org/): converts PDF figures (used by `pdf2image`)
+
+On Debian/Ubuntu:
+
+``` console
+$ sudo apt-get install ghostscript poppler-utils
+```
+
+On macOS:
+
+``` console
+$ brew install ghostscript poppler
+```
+
 ## Usage
 
 To extract plots from a tarball:
@@ -29,11 +48,6 @@ To extract plots from a tarball:
     'url': './1503.07589.tar.gz_files/LHC_combined_obs_unblind_final.png',
 }
 ```
-
-## Notes
-
-If you experience frequent `DelegateError` errors you may need to update
-your version of GhostScript.
 
 ## License
 GPLv2

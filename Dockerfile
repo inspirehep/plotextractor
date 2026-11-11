@@ -7,8 +7,6 @@ WORKDIR ${APP_HOME}
 
 RUN apt-get update -y && apt-get install -y ghostscript poppler-utils
 
-RUN sed -i 's/domain="coder" rights="none"/domain="coder" rights="read\|write"/' /etc/ImageMagick-6/policy.xml
-
 RUN python -m pip install --no-cache-dir "poetry==${POETRY_VERSION}"
 
 COPY . .
