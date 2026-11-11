@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "python-magic>=0.4.27",
-    "pillow>=12.0.0",
+    "pillow>=13.0.0",
     "pdf2image==1.17.0",
     "pylatexenc==2.11",
 ]
